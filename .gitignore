@@ -1,0 +1,5 @@
+.coverage
+.idea
+.vscode
+__pycache__
+htmlcov
