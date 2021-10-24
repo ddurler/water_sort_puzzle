@@ -88,17 +88,17 @@ class TestEprouvette(unittest.TestCase):
 
     def test_eprouvette_verser(self):
         tests = [
-            { "source": [],                   "destination": [],                   "possible": False},
-            { "source": ['A'],                "destination": [],                   "possible": True, "nb_doses": 1 },
-            { "source": ['A'],                "destination": ['B'],                "possible": False },
-            { "source": ['A'],                "destination": ['A'],                "possible": True, "nb_doses": 1 },
-            { "source": ['A', 'A'],           "destination": ['A'],                "possible": True, "nb_doses": 2 },
-            { "source": ['A', 'A'],           "destination": ['A', 'A'],           "possible": True, "nb_doses": 2 },
-            { "source": ['A', 'A', 'A'],      "destination": ['A', 'A'],           "possible": True, "nb_doses": 2 },
-            { "source": ['A', 'A', 'A'],      "destination": ['A', 'A', 'A'],      "possible": True, "nb_doses": 1 },
-            { "source": ['A'],                "destination": ['A', 'A', 'A', 'A'], "possible": False },
-            { "source": ['B', 'B', 'A'],      "destination": ['A'],                "possible": True, "nb_doses": 1 },
-            { "source": ['B', 'B', 'A', 'A'], "destination": ['B', 'A'],           "possible": True, "nb_doses": 2 },
+            {"source": [],                   "destination": [],                   "possible": False},
+            {"source": ['A'],                "destination": [],                   "possible": True, "nb_doses": 1},
+            {"source": ['A'],                "destination": ['B'],                "possible": False},
+            {"source": ['A'],                "destination": ['A'],                "possible": True, "nb_doses": 1},
+            {"source": ['A', 'A'],           "destination": ['A'],                "possible": True, "nb_doses": 2},
+            {"source": ['A', 'A'],           "destination": ['A', 'A'],           "possible": True, "nb_doses": 2},
+            {"source": ['A', 'A', 'A'],      "destination": ['A', 'A'],           "possible": True, "nb_doses": 2},
+            {"source": ['A', 'A', 'A'],      "destination": ['A', 'A', 'A'],      "possible": True, "nb_doses": 1},
+            {"source": ['A'],                "destination": ['A', 'A', 'A', 'A'], "possible": False},
+            {"source": ['B', 'B', 'A'],      "destination": ['A'],                "possible": True, "nb_doses": 1},
+            {"source": ['B', 'B', 'A', 'A'], "destination": ['B', 'A'],           "possible": True, "nb_doses": 2},
         ]
 
         for test in tests:
