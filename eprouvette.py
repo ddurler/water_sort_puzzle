@@ -1,6 +1,6 @@
 #! coding:utf-8
 
-from typing import List, Any
+from typing import List, Set, Any
 from typing import TypeVar, Generic
 
 """
@@ -50,9 +50,14 @@ class Eprouvette(Generic[TypeGenericEprouvette]):
         return len(self._doses)
 
     @property
+    def liquides(self) -> Set[Any]:
+        """ @return Set des différents liquides dans l'éprouvette."""
+        return set(self._doses)
+
+    @property
     def nb_different_liquides(self) -> int:
         """ Nombre de liquides différents dans l'éprouvette [entre 0 et MAX_DOSES]."""
-        return len(set(self._doses))
+        return len(self.liquides)
 
     @property
     def top_liquide(self) -> Any | None:

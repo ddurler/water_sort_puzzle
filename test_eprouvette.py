@@ -10,6 +10,7 @@ class TestEprouvette(unittest.TestCase):
     def test_epouvette_RR(self):
         e = Eprouvette(['R', 'R'])
         self.assertEqual(e.nb_different_liquides, 1)
+        self.assertEqual(e.liquides, {'R'})
         self.assertEqual(e.nb_total_doses, 2)
         self.assertEqual(e.top_liquide, 'R')
         self.assertEqual(e[0], 'R')
@@ -24,6 +25,7 @@ class TestEprouvette(unittest.TestCase):
     def test_epouvette_ABC(self):
         e = Eprouvette(['A', 'B', 'C'])
         self.assertEqual(e.nb_different_liquides, 3)
+        self.assertEqual(e.liquides, {'A', 'B', 'C'})
         self.assertEqual(e.nb_total_doses, 3)
         self.assertEqual(e.top_liquide, 'C')
         self.assertEqual(e[0], 'A')
