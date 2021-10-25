@@ -75,4 +75,19 @@ Ici, on verse (1) dans (2) :
   `coverage report -m` pour un résume de la couverture de code avec les numéros de lignes non couvertes
   'coverage html' pour générer un rapport dans ./htmpcov (ouvrir index.html)
 
+### mypy
+
+[mypy](https://mypy.readthedocs.io/en/latest/index.html) est un outil statique pour vérifier les types d'un
+programme python.
+
+`pip install mypy` pour installer l'outil (il existe une extension pour VSCode)
+`mypy monfichier.py` pour analyser un fichier source python
+ 
+ ### black
+
+ [black](https://github.com/psf/black) est un outil de reformatage du code source python.
+
+ `pip install black` pour installer l'outil
+ `black monfichier.py` pour modifier le code source du fichier conformément aux règles pythoniques
+ `black .` pour modifier tous les codes source d'un répertoire
  
