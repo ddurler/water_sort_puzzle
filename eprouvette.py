@@ -1,7 +1,6 @@
 #! coding:utf-8
 
 from typing import List, Set, Any
-from typing import TypeVar, Generic
 
 """
 Une éprouvette contient MAX_DOSES doses de liquide.
@@ -21,11 +20,7 @@ class EprouvetteError(Exception):
         super().__init__(e)
 
 
-# Type générique pour les éprouvettes (nécessaire pour le typing dans la classe Eprouvette)
-TypeGenericEprouvette = TypeVar('TypeGenericEprouvette')
-
-
-class Eprouvette(Generic[TypeGenericEprouvette]):
+class Eprouvette:
 
     MAX_DOSES: int = 4  # Nombre max de doses par éprouvettes
 
@@ -101,8 +96,9 @@ class Eprouvette(Generic[TypeGenericEprouvette]):
             raise EprouvetteError(f"Impossible d'ajouter du {liquide} dans l'éprouvette {self}")
         self._doses.append(liquide)
 
-    def is_possible_verser_une_dose_dans(self, destination: TypeGenericEprouvette) -> bool:
+    def is_possible_verser_une_dose_dans(self, destination) -> bool:
         """ @return True si au moins une dose de liquide peut être versée vers l'éprouvette destination."""
+        # TODO : Comment typer ici le type pour destination ? destination: Eprouvette => Erreur ???
         if self.is_vide:
             return False
         if destination.is_vide:
@@ -112,10 +108,11 @@ class Eprouvette(Generic[TypeGenericEprouvette]):
         # Si les liquides sont les mêmes
         return self.top_liquide == destination.top_liquide
 
-    def verser_dans(self, destination: TypeGenericEprouvette) -> int:
+    def verser_dans(self, destination) -> int:
         """ Verse toutes les doses possibles vers l'éprouvette destination.
             @return le nombre de doses versées
         """
+        # TODO : Comment typer ici le type pour destination ? destination: Eprouvette => Erreur ???
         nb_doses = 0
         while self.is_possible_verser_une_dose_dans(destination):
             liquide = self.pop_dose()
