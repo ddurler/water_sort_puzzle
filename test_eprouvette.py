@@ -111,6 +111,9 @@ class TestEprouvette(unittest.TestCase):
             {"source": ['B', 'B', 'A', 'A'], "destination": ['B', 'A'],           "possible": True, "nb_doses": 2},
         ]
 
+        # Ce test ne fonctionne que pour des éprouvettes contenant 4 doses
+        self.assertEqual(Eprouvette.MAX_DOSES, 4)
+        
         for test in tests:
             source = Eprouvette(test["source"])
             destination = Eprouvette(test["destination"])
