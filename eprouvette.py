@@ -101,6 +101,7 @@ class Eprouvette:
 
     def is_possible_verser_une_dose_dans(self, destination: Eprouvette) -> bool:
         """ @return True si au moins une dose de liquide peut être versée vers l'éprouvette destination."""
+        assert isinstance(destination, Eprouvette)
         if self.is_vide:
             return False
         if destination.is_vide:
@@ -114,6 +115,7 @@ class Eprouvette:
         """ Verse toutes les doses possibles vers l'éprouvette destination.
             @return le nombre de doses versées
         """
+        assert isinstance(destination, Eprouvette)
         nb_doses = 0
         while self.is_possible_verser_une_dose_dans(destination):
             liquide = self.pop_dose()
