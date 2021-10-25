@@ -127,6 +127,11 @@ class Eprouvette:
             nb_doses += 1
         return nb_doses
 
+    def clone(self) -> Eprouvette:
+        """ Crée et retourne une copie clone de l'éprouvette."""
+        copy_list_doses = self._doses.copy()
+        return Eprouvette(copy_list_doses)
+
     def __repr__(self):
         return f"Eprouvette<{self._doses}>"
     

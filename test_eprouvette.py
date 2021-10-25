@@ -113,7 +113,7 @@ class TestEprouvette(unittest.TestCase):
 
         # Ce test ne fonctionne que pour des éprouvettes contenant 4 doses
         self.assertEqual(Eprouvette.MAX_DOSES, 4)
-        
+
         for test in tests:
             source = Eprouvette(test["source"])
             destination = Eprouvette(test["destination"])
@@ -129,6 +129,13 @@ class TestEprouvette(unittest.TestCase):
                 self.assertEqual(destination_nb_doses_avant + nb_doses, destination.nb_total_doses)
             else:
                 self.assertFalse(source.is_possible_verser_une_dose_dans(destination))
+
+    def test_eprouvette_clone(self):
+        list_liquides = ['A', 'B', 'C']
+        e = Eprouvette(list_liquides)
+        clone_e = e.clone()
+        for i, dose in enumerate(clone_e):
+            self.assertEqual(list_liquides[i], dose)
 
 
 if __name__ == '__main__':
