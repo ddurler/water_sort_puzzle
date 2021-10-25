@@ -38,6 +38,14 @@ class TestEprouvette(unittest.TestCase):
         list_liquides = ['A' for _ in range(Eprouvette.MAX_DOSES + 1)]
         self.assertRaises(EprouvetteError, Eprouvette, list_liquides)
 
+    def test_eprouvette_iterable(self):
+        e = Eprouvette(['A', 'B', 'C'])
+        s = ""
+        for dose in e:
+            s += dose
+        self.assertEqual(s, "ABC")
+
+
     def test_eprouvette_pop(self):
         e = Eprouvette(['A', 'B', 'B', 'C'])
 

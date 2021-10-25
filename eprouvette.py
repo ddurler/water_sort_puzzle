@@ -74,6 +74,10 @@ class Eprouvette:
             return None
         return self._doses[index]
 
+    def __iter__(self):
+        """ Implémente un itérateur sur toutes les doses de l'éprouvette."""
+        return self._doses.__iter__()
+
     def pop_dose(self) -> Any:
         """ Retire une dose en haut de l'éprouvette."""
         if self.is_vide:
