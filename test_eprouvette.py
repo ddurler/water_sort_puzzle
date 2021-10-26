@@ -98,7 +98,7 @@ class TestEprouvette(unittest.TestCase):
 
     def test_eprouvette_verser(self):
         tests = [
-             {"source": [],                   "destination": [],                   "possible": False},
+            {"source": [],                   "destination": [],                   "possible": False},
             {"source": ['A'],                "destination": [],                   "possible": True, "nb_doses": 1},
             {"source": ['A'],                "destination": ['B'],                "possible": False},
             {"source": ['A'],                "destination": ['A'],                "possible": True, "nb_doses": 1},
@@ -133,6 +133,34 @@ class TestEprouvette(unittest.TestCase):
                 )
             else:
                 self.assertFalse(source.is_possible_verser_une_dose_dans(destination))
+
+    def test_eprouvette_eq(self):
+        tests = [
+            [[],                [],                     True],
+            [[],                ['A'],                  False],
+            [['A'],             [],                     False],
+            [['A'],             ['A'],                  True],
+            [['A'],             ['A', 'B'],             False],
+            [['A'],             ['B'],                  False],
+            [['A', 'B', 'C'],   ['A'],                  False],
+            [['A', 'B', 'C'],   ['A', 'B'],             False],
+            [['A', 'B', 'C'],   ['A', 'B', 'B'],        False],
+            [['A', 'B', 'C'],   ['A', 'B', 'C'],        True],
+            [['A', 'B', 'C'],   ['A', 'B', 'C', 'D'],   False],
+        ]
+
+        # Ce test ne fonctionne que pour des éprouvettes contenant au moins 4 doses
+        self.assertTrue(Eprouvette.MAX_DOSES >= 4)
+
+        for test in tests:
+            e0 = Eprouvette(test[0])
+            e1 = Eprouvette(test[1])
+            if test[2]:
+                self.assertTrue(e0 == e1)
+                self.assertFalse(e0 != e1)
+            else:
+                self.assertFalse(e0 == e1)
+                self.assertTrue(e0 != e1)
 
     def test_eprouvette_clone(self):
         list_liquides = ["A", "B", "C"]

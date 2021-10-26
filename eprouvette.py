@@ -82,6 +82,17 @@ class Eprouvette:
         """Implémente un itérateur sur toutes les doses de l'éprouvette."""
         return self._doses.__iter__()
 
+    def __eq__(self, other: Eprouvette) -> bool:
+        """Implémente l'opérateur == entre 2 éprouvettes."""
+        if not isinstance(other, Eprouvette):
+            return False
+        if self.nb_total_doses != other.nb_total_doses:
+            return False
+        for liquide1, liquide2 in zip(self, other):
+            if liquide1 != liquide2:
+                return False
+        return True
+
     def pop_dose(self) -> Any:
         """Retire une dose en haut de l'éprouvette."""
         if self.is_vide:
