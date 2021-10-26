@@ -10,7 +10,7 @@ class TestEprouvette(unittest.TestCase):
         e = Eprouvette(["R", "R"])
         self.assertEqual(e.nb_different_liquides, 1)
         self.assertEqual(e.liquides, {"R"})
-        self.assertEqual(e.nb_total_doses, 2)
+        self.assertEqual(len(e), 2)
         self.assertEqual(e.top_liquide, "R")
         self.assertEqual(e[0], "R")
         self.assertEqual(e[1], "R")
@@ -27,7 +27,7 @@ class TestEprouvette(unittest.TestCase):
         e = Eprouvette(["A", "B", "C"])
         self.assertEqual(e.nb_different_liquides, 3)
         self.assertEqual(e.liquides, {"A", "B", "C"})
-        self.assertEqual(e.nb_total_doses, 3)
+        self.assertEqual(len(e), 3)
         self.assertEqual(e.top_liquide, "C")
         self.assertEqual(e[0], "A")
         self.assertEqual(e[1], "B")
@@ -52,25 +52,25 @@ class TestEprouvette(unittest.TestCase):
         c = e.pop_dose()
         self.assertEqual(c, "C")
         self.assertEqual(e.nb_different_liquides, 2)
-        self.assertEqual(e.nb_total_doses, 3)
+        self.assertEqual(len(e), 3)
         self.assertEqual(e.top_liquide, "B")
 
         c = e.pop_dose()
         self.assertEqual(c, "B")
         self.assertEqual(e.nb_different_liquides, 2)
-        self.assertEqual(e.nb_total_doses, 2)
+        self.assertEqual(len(e), 2)
         self.assertEqual(e.top_liquide, "B")
 
         c = e.pop_dose()
         self.assertEqual(c, "B")
         self.assertEqual(e.nb_different_liquides, 1)
-        self.assertEqual(e.nb_total_doses, 1)
+        self.assertEqual(len(e), 1)
         self.assertEqual(e.top_liquide, "A")
 
         c = e.pop_dose()
         self.assertEqual(c, "A")
         self.assertEqual(e.nb_different_liquides, 0)
-        self.assertEqual(e.nb_total_doses, 0)
+        self.assertEqual(len(e), 0)
         self.assertEqual(e.top_liquide, None)
 
         self.assertRaises(EprouvetteError, e.pop_dose)
@@ -81,7 +81,7 @@ class TestEprouvette(unittest.TestCase):
         self.assertTrue(e.can_push_dose("A"))
         e.push_dose("A")
         self.assertEqual(e.nb_different_liquides, 1)
-        self.assertEqual(e.nb_total_doses, 2)
+        self.assertEqual(len(e), 2)
         self.assertEqual(e.top_liquide, "A")
 
         self.assertFalse(e.can_push_dose("B"))
@@ -118,19 +118,15 @@ class TestEprouvette(unittest.TestCase):
             source = Eprouvette(test["source"])
             destination = Eprouvette(test["destination"])
 
-            source_nb_doses_avant = source.nb_total_doses
-            destination_nb_doses_avant = destination.nb_total_doses
+            len_source_avant = len(source)
+            len_destination_avant = len(destination)
 
             if test["possible"]:
                 self.assertTrue(source.is_possible_verser_une_dose_dans(destination))
                 nb_doses = source.verser_dans(destination)
                 self.assertEqual(test["nb_doses"], nb_doses)
-                self.assertEqual(
-                    source_nb_doses_avant - nb_doses, source.nb_total_doses
-                )
-                self.assertEqual(
-                    destination_nb_doses_avant + nb_doses, destination.nb_total_doses
-                )
+                self.assertEqual(len_source_avant - nb_doses, len(source))
+                self.assertEqual(len_destination_avant + nb_doses, len(destination))
             else:
                 self.assertFalse(source.is_possible_verser_une_dose_dans(destination))
 
@@ -152,6 +148,8 @@ class TestEprouvette(unittest.TestCase):
         # Ce test ne fonctionne que pour des éprouvettes contenant au moins 4 doses
         self.assertTrue(Eprouvette.MAX_DOSES >= 4)
 
+        self.assertFalse(Eprouvette(['A']) == "Objet_qui_n_est_pas_une_eprouvette")
+
         for test in tests:
             e0 = Eprouvette(test[0])
             e1 = Eprouvette(test[1])
@@ -166,6 +164,8 @@ class TestEprouvette(unittest.TestCase):
         list_liquides = ["A", "B", "C"]
         e = Eprouvette(list_liquides)
         clone_e = e.clone()
+        self.assertTrue(e == clone_e)
+        self.assertFalse(e != clone_e)
         for i, dose in enumerate(clone_e):
             self.assertEqual(list_liquides[i], dose)
 

@@ -5,16 +5,6 @@ from __future__ import annotations
 
 from typing import List, Set, Any
 
-"""
-Une éprouvette contient MAX_DOSES doses de liquide.
-
-Le contenu d'une éprouvette est une List[Any] où Any est un objet qui identifie un liquide particulier.
-
-Contenu = [] si l'éprouvette est vide
-Contenu = ['X'] si l'éprouvette contient une dose de 'X'
-Contenu = ['X', 'Y', 'Y'] si l'éprouvette contient une dose de 'X' et 2 doses de 'Y' au dessus
-"""
-
 
 class EprouvetteError(Exception):
     """Toutes les exceptions détectées par la classe Eprouvette."""
@@ -24,6 +14,15 @@ class EprouvetteError(Exception):
 
 
 class Eprouvette:
+    """
+    Une éprouvette contient MAX_DOSES doses de liquide.
+
+    Le contenu d'une éprouvette est une List[Any] où Any est un objet qui identifie un liquide particulier.
+
+    Contenu = [] si l'éprouvette est vide
+    Contenu = ['X'] si l'éprouvette contient une dose de 'X'
+    Contenu = ['X', 'Y', 'Y'] si l'éprouvette contient une dose de 'X' et 2 doses de 'Y' au dessus
+    """
 
     MAX_DOSES: int = 4  # Nombre max de doses par éprouvettes
 
@@ -44,9 +43,8 @@ class Eprouvette:
         """@return True si l'éprouvette est pleine."""
         return len(self._doses) == self.MAX_DOSES
 
-    @property
-    def nb_total_doses(self) -> int:
-        """Nombre total de doses dans l'éprouvette [entre 0 et MAX_DOSES]."""
+    def __len__(self) -> int:
+        """Implémente len() pour une éprouvette -> Nombre total de doses dans l'éprouvette [entre 0 et MAX_DOSES]."""
         return len(self._doses)
 
     @property
@@ -74,7 +72,7 @@ class Eprouvette:
             raise EprouvetteError(
                 f"Index = {index} : On ne peut pas avoir plus de {self.MAX_DOSES} dans l'éprouvette"
             )
-        if index >= self.nb_total_doses:
+        if index >= len(self):
             return None
         return self._doses[index]
 
@@ -82,11 +80,11 @@ class Eprouvette:
         """Implémente un itérateur sur toutes les doses de l'éprouvette."""
         return self._doses.__iter__()
 
-    def __eq__(self, other: Eprouvette) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Implémente l'opérateur == entre 2 éprouvettes."""
         if not isinstance(other, Eprouvette):
             return False
-        if self.nb_total_doses != other.nb_total_doses:
+        if len(self) != len(other):
             return False
         for liquide1, liquide2 in zip(self, other):
             if liquide1 != liquide2:
