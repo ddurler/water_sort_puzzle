@@ -169,6 +169,13 @@ class TestEprouvette(unittest.TestCase):
         for i, dose in enumerate(clone_e):
             self.assertEqual(list_liquides[i], dose)
 
+    def test_eprouvette_repr(self):
+        e = Eprouvette(["A", "B", "C"])
+        e_repr = f"{e}"
+        self.assertIn("A", e_repr)
+        self.assertIn("B", e_repr)
+        self.assertIn("C", e_repr)
+
 
 if __name__ == "__main__":
 
