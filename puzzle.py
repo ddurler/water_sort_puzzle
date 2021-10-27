@@ -3,7 +3,7 @@
 # Import pour pouvoir faire du typing :Puzzle dans la classe Puzzle
 from __future__ import annotations
 
-from typing import List, Tuple
+from typing import Any, List, Tuple, Generator
 from collections import Counter
 from itertools import permutations
 
@@ -55,8 +55,8 @@ class Puzzle:
         """Implémente un itérateur sur toutes les éprouvettes du puzzle."""
         return self._eprouvettes.__iter__()
 
-    def iter_permutations(self) -> Tuple(Eprouvette, Eprouvette):
-        """Iterator sur toutes les combinaisons d'éprouvettes du puzzle."""
+    def iter_permutations(self) -> Generator[Tuple[Any, ...], None, None]:
+        """Iterator sur toutes les combinaisons Tuple[Eprouvette, Eprouvette] du puzzle."""
         for permutation in permutations(self, 2):
             yield permutation
 
@@ -101,7 +101,10 @@ class Puzzle:
         """@return True si le puzzle est terminé."""
         eprouvette: Eprouvette
         for eprouvette in self:
-            if not (eprouvette.is_vide or (eprouvette.is_pleine and len(eprouvette.liquides) == 1)):
+            if not (
+                eprouvette.is_vide
+                or (eprouvette.is_pleine and len(eprouvette.liquides) == 1)
+            ):
                 return False
         return True
 

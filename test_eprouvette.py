@@ -98,17 +98,47 @@ class TestEprouvette(unittest.TestCase):
 
     def test_eprouvette_verser(self):
         tests = [
-            {"source": [],                   "destination": [],                   "possible": False},
-            {"source": ['A'],                "destination": [],                   "possible": True, "nb_doses": 1},
-            {"source": ['A'],                "destination": ['B'],                "possible": False},
-            {"source": ['A'],                "destination": ['A'],                "possible": True, "nb_doses": 1},
-            {"source": ['A', 'A'],           "destination": ['A'],                "possible": True, "nb_doses": 2},
-            {"source": ['A', 'A'],           "destination": ['A', 'A'],           "possible": True, "nb_doses": 2},
-            {"source": ['A', 'A', 'A'],      "destination": ['A', 'A'],           "possible": True, "nb_doses": 2},
-            {"source": ['A', 'A', 'A'],      "destination": ['A', 'A', 'A'],      "possible": True, "nb_doses": 1},
-            {"source": ['A'],                "destination": ['A', 'A', 'A', 'A'], "possible": False},
-            {"source": ['B', 'B', 'A'],      "destination": ['A'],                "possible": True, "nb_doses": 1},
-            {"source": ['B', 'B', 'A', 'A'], "destination": ['B', 'A'],           "possible": True, "nb_doses": 2}, 
+            {"source": [], "destination": [], "possible": False},
+            {"source": ["A"], "destination": [], "possible": True, "nb_doses": 1},
+            {"source": ["A"], "destination": ["B"], "possible": False},
+            {"source": ["A"], "destination": ["A"], "possible": True, "nb_doses": 1},
+            {
+                "source": ["A", "A"],
+                "destination": ["A"],
+                "possible": True,
+                "nb_doses": 2,
+            },
+            {
+                "source": ["A", "A"],
+                "destination": ["A", "A"],
+                "possible": True,
+                "nb_doses": 2,
+            },
+            {
+                "source": ["A", "A", "A"],
+                "destination": ["A", "A"],
+                "possible": True,
+                "nb_doses": 2,
+            },
+            {
+                "source": ["A", "A", "A"],
+                "destination": ["A", "A", "A"],
+                "possible": True,
+                "nb_doses": 1,
+            },
+            {"source": ["A"], "destination": ["A", "A", "A", "A"], "possible": False},
+            {
+                "source": ["B", "B", "A"],
+                "destination": ["A"],
+                "possible": True,
+                "nb_doses": 1,
+            },
+            {
+                "source": ["B", "B", "A", "A"],
+                "destination": ["B", "A"],
+                "possible": True,
+                "nb_doses": 2,
+            },
         ]
 
         # Ce test ne fonctionne que pour des éprouvettes contenant 4 doses
@@ -132,23 +162,23 @@ class TestEprouvette(unittest.TestCase):
 
     def test_eprouvette_eq(self):
         tests = [
-            [[],                [],                     True],
-            [[],                ['A'],                  False],
-            [['A'],             [],                     False],
-            [['A'],             ['A'],                  True],
-            [['A'],             ['A', 'B'],             False],
-            [['A'],             ['B'],                  False],
-            [['A', 'B', 'C'],   ['A'],                  False],
-            [['A', 'B', 'C'],   ['A', 'B'],             False],
-            [['A', 'B', 'C'],   ['A', 'B', 'B'],        False],
-            [['A', 'B', 'C'],   ['A', 'B', 'C'],        True],
-            [['A', 'B', 'C'],   ['A', 'B', 'C', 'D'],   False],
+            [[], [], True],
+            [[], ["A"], False],
+            [["A"], [], False],
+            [["A"], ["A"], True],
+            [["A"], ["A", "B"], False],
+            [["A"], ["B"], False],
+            [["A", "B", "C"], ["A"], False],
+            [["A", "B", "C"], ["A", "B"], False],
+            [["A", "B", "C"], ["A", "B", "B"], False],
+            [["A", "B", "C"], ["A", "B", "C"], True],
+            [["A", "B", "C"], ["A", "B", "C", "D"], False],
         ]
 
         # Ce test ne fonctionne que pour des éprouvettes contenant au moins 4 doses
         self.assertTrue(Eprouvette.MAX_DOSES >= 4)
 
-        self.assertFalse(Eprouvette(['A']) == "Objet_qui_n_est_pas_une_eprouvette")
+        self.assertFalse(Eprouvette(["A"]) == "Objet_qui_n_est_pas_une_eprouvette")
 
         for test in tests:
             e0 = Eprouvette(test[0])

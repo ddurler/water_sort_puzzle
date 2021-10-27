@@ -19,9 +19,9 @@ class TestPuzzle(unittest.TestCase):
         self.assertEqual(len(p), 1)
 
     def test_puzzle_items(self):
-        e_0 = Eprouvette(['A'])
-        e_1 = Eprouvette(['B'])
-        e_2 = Eprouvette(['C'])
+        e_0 = Eprouvette(["A"])
+        e_1 = Eprouvette(["B"])
+        e_2 = Eprouvette(["C"])
         p = Puzzle([e_0, e_1, e_2])
         self.assertEqual(p[0], e_0)
         self.assertEqual(p[1], e_1)
@@ -36,14 +36,14 @@ class TestPuzzle(unittest.TestCase):
 
     def test_puzzle_eq(self):
         tests = [
-            [[""],          [""],           True],
-            [[""],          ["A"],          False],
-            [["A"],         [""],           False],
-            [["A"],         ["A"],          True],
-            [["A"],         ["B"],          False],
-            [["A"],         ["AB", "C"],    False],
-            [["AB"],        ["B"],          False],
-            [["AB", "B"],   ["AB", "B"],    True],
+            [[""], [""], True],
+            [[""], ["A"], False],
+            [["A"], [""], False],
+            [["A"], ["A"], True],
+            [["A"], ["B"], False],
+            [["A"], ["AB", "C"], False],
+            [["AB"], ["B"], False],
+            [["AB", "B"], ["AB", "B"], True],
         ]
 
         self.assertFalse(Puzzle() == "Objet_qui_n_est_pas_un_puzzle")
@@ -58,7 +58,7 @@ class TestPuzzle(unittest.TestCase):
             for list_liquide in test[1]:
                 e = Eprouvette(list_liquide)
                 p1.add_eprouvette(e)
-            
+
             if test[2]:
                 self.assertTrue(p0 == p1)
                 self.assertFalse(p0 != p1)
@@ -67,15 +67,15 @@ class TestPuzzle(unittest.TestCase):
                 self.assertTrue(p0 != p1)
 
     def test_puzzle_clone(self):
-        p = Puzzle([Eprouvette(['A', 'A']), Eprouvette(['B'])])
+        p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])])
         p2 = p.clone()
         self.assertTrue(p == p2)
         self.assertFalse(p != p2)
 
     def test_puzzle_permutations(self):
-        e_a = Eprouvette(['A'])
-        e_b = Eprouvette(['B'])
-        e_c = Eprouvette(['C'])
+        e_a = Eprouvette(["A"])
+        e_b = Eprouvette(["B"])
+        e_c = Eprouvette(["C"])
         p = Puzzle([e_a, e_b, e_c])
         permutations = [perm for perm in p.iter_permutations()]
         self.assertEqual(len(permutations), 6)
@@ -103,16 +103,16 @@ class TestPuzzle(unittest.TestCase):
 
     def test_puzzle_is_done(self):
         tests = [
-            [[""],                      True],
-            [["A"],                     False],
-            [["AA"],                    False],
-            [["AAA"],                   False],
-            [["AAAA"],                  True],
-            [["AABB"],                  False],
-            [["AAAA", ""],              True],
-            [["AAAA", "AABB"],          False],
-            [["AAAA", "AABB"],          False],
-            [["AAAA", "BBBB", ""],      True],
+            [[""], True],
+            [["A"], False],
+            [["AA"], False],
+            [["AAA"], False],
+            [["AAAA"], True],
+            [["AABB"], False],
+            [["AAAA", ""], True],
+            [["AAAA", "AABB"], False],
+            [["AAAA", "AABB"], False],
+            [["AAAA", "BBBB", ""], True],
         ]
 
         # Ce test ne fonctionne que pour des éprouvettes de 4 doses
