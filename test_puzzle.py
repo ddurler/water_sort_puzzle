@@ -36,14 +36,14 @@ class TestPuzzle(unittest.TestCase):
 
     def test_puzzle_eq(self):
         tests = [
-            [[],                    [],                     True],
-            [[],                    [['A']],                False],
-            [[['A']],               [],                     False],
-            [[['A']],               [['A']],                True],
-            [[['A']],               [['B']],                False],
-            [[['A']],               [['A', 'B'], ['C']],    False],
-            [[['A'], ['B']],        [['B']],                False],
-            [[['A', 'B'], ['B']],   [['A', 'B'], ['B']],    True],
+            [[""],          [""],           True],
+            [[""],          ["A"],          False],
+            [["A"],         [""],           False],
+            [["A"],         ["A"],          True],
+            [["A"],         ["B"],          False],
+            [["A"],         ["AB", "C"],    False],
+            [["AB"],        ["B"],          False],
+            [["AB", "B"],   ["AB", "B"],    True],
         ]
 
         self.assertFalse(Puzzle() == "Objet_qui_n_est_pas_un_puzzle")
@@ -91,15 +91,40 @@ class TestPuzzle(unittest.TestCase):
         for nb_doses in range(Eprouvette.MAX_DOSES):  # 0..MAX_DOSES-1
             p.add_eprouvette(Eprouvette(["A"]))
             if nb_doses == Eprouvette.MAX_DOSES - 1:
-                self.assertTrue(p.is_consistant())
+                self.assertTrue(p.is_consistant)
             else:
-                self.assertFalse(p.is_consistant())
+                self.assertFalse(p.is_consistant)
 
     def test_puzzle_is_consistant_nb_doses_vides(self):
         list_liquides = ["A" for _ in range(Eprouvette.MAX_DOSES)]
         e = Eprouvette(list_liquides)
         p = Puzzle([e])
-        self.assertFalse(p.is_consistant())
+        self.assertFalse(p.is_consistant)
+
+    def test_puzzle_is_done(self):
+        tests = [
+            [[""],                      True],
+            [["A"],                     False],
+            [["AA"],                    False],
+            [["AAA"],                   False],
+            [["AAAA"],                  True],
+            [["AABB"],                  False],
+            [["AAAA", ""],              True],
+            [["AAAA", "AABB"],          False],
+            [["AAAA", "AABB"],          False],
+            [["AAAA", "BBBB", ""],      True],
+        ]
+
+        # Ce test ne fonctionne que pour des éprouvettes de 4 doses
+        self.assertEqual(Eprouvette.MAX_DOSES, 4)
+
+        for test in tests:
+            p = Puzzle()
+            for list_strings in test[0]:
+                e = Eprouvette(list_strings)
+                p.add_eprouvette(e)
+
+            self.assertEqual(p.is_done, test[1])
 
 
 if __name__ == "__main__":

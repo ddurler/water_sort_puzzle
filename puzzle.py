@@ -17,7 +17,7 @@ class Puzzle:
     On peut créer le puzzle en indiquant une liste d'éprouvette.
     On peut compléter le puzzle avec la méthode @see add_eprouvette
 
-    La méthode @see is_consistant permet de vérifier que le puzzle est consistant par rapport au
+    La propriété @see is_consistant permet de vérifier que le puzzle est consistant par rapport au
     contenu des éprouvettes
     """
 
@@ -60,6 +60,7 @@ class Puzzle:
         for permutation in permutations(self, 2):
             yield permutation
 
+    @property
     def is_consistant(self) -> bool:
         """
         Vérifie la consistance du puzzle.
@@ -95,9 +96,18 @@ class Puzzle:
         # Tout est OK
         return True
 
+    @property
+    def is_done(self) -> bool:
+        """@return True si le puzzle est terminé."""
+        eprouvette: Eprouvette
+        for eprouvette in self:
+            if not (eprouvette.is_vide or (eprouvette.is_pleine and len(eprouvette.liquides) == 1)):
+                return False
+        return True
+
     def clone(self) -> Puzzle:
         """Crée et retourne une copie clone du puzzle."""
-        copy_list_eprouvettes = []
+        copy_list_eprouvettes: List[Eprouvette] = []
         for eprouvette in self:
             copy_list_eprouvettes.append(eprouvette.clone())
 
