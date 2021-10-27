@@ -63,6 +63,20 @@ class TestPuzzle(unittest.TestCase):
         self.assertTrue(p == p2)
         self.assertFalse(p != p2)
 
+    def test_puzzle_permutations(self):
+        e_a = Eprouvette(['A'])
+        e_b = Eprouvette(['B'])
+        e_c = Eprouvette(['C'])
+        p = Puzzle([e_a, e_b, e_c])
+        permutations = [perm for perm in p.iter_permutations()]
+        self.assertEqual(len(permutations), 6)
+        self.assertIn((e_a, e_b), permutations)
+        self.assertIn((e_a, e_c), permutations)
+        self.assertIn((e_b, e_a), permutations)
+        self.assertIn((e_b, e_c), permutations)
+        self.assertIn((e_c, e_a), permutations)
+        self.assertIn((e_c, e_b), permutations)
+
     def test_puzzle_is_consistant_nb_doses_liquide(self):
         p = Puzzle()
         for nb_doses in range(Eprouvette.MAX_DOSES):  # 0..MAX_DOSES-1

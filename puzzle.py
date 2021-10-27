@@ -3,8 +3,9 @@
 # Import pour pouvoir faire du typing :Puzzle dans la classe Puzzle
 from __future__ import annotations
 
-from typing import List
+from typing import List, Tuple
 from collections import Counter
+from itertools import permutations
 
 from eprouvette import Eprouvette
 
@@ -49,6 +50,11 @@ class Puzzle:
     def __iter__(self):
         """Implémente un itérateur sur toutes les éprouvettes du puzzle."""
         return self._eprouvettes.__iter__()
+
+    def iter_permutations(self) -> Tuple(Eprouvette, Eprouvette):
+        """Iterator sur toutes les combinaisons d'éprouvettes du puzzle."""
+        for permutation in permutations(self, 2):
+            yield permutation
 
     def is_consistant(self) -> bool:
         """
