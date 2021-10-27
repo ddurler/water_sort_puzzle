@@ -18,6 +18,15 @@ class TestPuzzle(unittest.TestCase):
         p.add_eprouvette(Eprouvette(["R"]))
         self.assertEqual(len(p), 1)
 
+    def test_puzzle_items(self):
+        e_0 = Eprouvette(['A'])
+        e_1 = Eprouvette(['B'])
+        e_2 = Eprouvette(['C'])
+        p = Puzzle([e_0, e_1, e_2])
+        self.assertEqual(p[0], e_0)
+        self.assertEqual(p[1], e_1)
+        self.assertEqual(p[2], e_2)
+
     def test_puzzle_repr(self):
         p = Puzzle([Eprouvette(["A", "B"]), Eprouvette(["C"])])
         puzzle_repr = f"{p}"

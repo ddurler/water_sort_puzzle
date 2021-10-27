@@ -36,6 +36,10 @@ class Puzzle:
         """Implémente l'opération len() pour un puzzle -> Nombre d'éprouvettes du puzzle."""
         return len(self._eprouvettes)
 
+    def __getitem__(self, index: int) -> Eprouvette:
+        """i-eme eprouvette du puzzle."""
+        return self._eprouvettes[index]
+
     def __eq__(self, other: object) -> bool:
         """Implémente l'opérateur == entre les puzzles."""
         if not isinstance(other, Puzzle):
