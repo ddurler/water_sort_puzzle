@@ -1,6 +1,5 @@
 #: coding:utf-8
 
-from tkinter import E
 import unittest
 
 from eprouvette import Eprouvette

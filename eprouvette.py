@@ -3,7 +3,7 @@
 # Import pour pouvoir faire du typing :Eprouvette dans la classe Eprouvette
 from __future__ import annotations
 
-from typing import List, Set, Any
+from typing import Sequence, Set, Any
 
 
 class EprouvetteError(Exception):
@@ -26,7 +26,7 @@ class Eprouvette:
 
     MAX_DOSES: int = 4  # Nombre max de doses par éprouvettes
 
-    def __init__(self, doses: List[Any]):
+    def __init__(self, doses: Sequence):
         if len(doses) > self.MAX_DOSES:
             raise EprouvetteError(
                 f"{doses} : On ne peut pas avoir plus de {self.MAX_DOSES} dans l'éprouvette"
@@ -150,4 +150,4 @@ class Eprouvette:
         return Eprouvette(copy_list_doses)
 
     def __repr__(self):
-        return f"Eprouvette<{self._doses}>"
+        return f"<{self._doses}>"

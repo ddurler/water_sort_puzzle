@@ -118,8 +118,8 @@ class Puzzle:
 
     def __repr__(self):
         ret = ""
-        for eprouvette in self:
+        for n, eprouvette in enumerate(self):
             if ret:
                 ret += ", "
-            ret += f"{eprouvette}"
+            ret += f"#{n + 1}{eprouvette}"
         return f"Puzzle<{ret}>"
