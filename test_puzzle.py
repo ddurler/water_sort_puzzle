@@ -87,15 +87,15 @@ class TestPuzzle(unittest.TestCase):
 
     def test_puzzle_is_consistant_nb_doses_liquide(self):
         p = Puzzle()
-        for nb_doses in range(Eprouvette.MAX_DOSES):  # 0..MAX_DOSES-1
-            p.add_eprouvette(Eprouvette(["A"]))
-            if nb_doses == Eprouvette.MAX_DOSES - 1:
+        for nb_doses in range(4):
+            p.add_eprouvette(Eprouvette(["A"], max_doses=4))
+            if nb_doses == 3:
                 self.assertTrue(p.is_consistant)
             else:
                 self.assertFalse(p.is_consistant)
 
     def test_puzzle_is_consistant_nb_doses_vides(self):
-        list_liquides = ["A" for _ in range(Eprouvette.MAX_DOSES)]
+        list_liquides = ["A" for _ in range(4)]
         e = Eprouvette(list_liquides)
         p = Puzzle([e])
         self.assertFalse(p.is_consistant)
@@ -114,13 +114,12 @@ class TestPuzzle(unittest.TestCase):
             [["AAAA", "BBBB", ""], True],
         ]
 
-        # Ce test ne fonctionne que pour des éprouvettes de 4 doses
-        self.assertEqual(Eprouvette.MAX_DOSES, 4)
+        # Ce test est prévu pour des éprouvettes de 4 doses
 
         for test in tests:
             p = Puzzle()
             for list_strings in test[0]:
-                e = Eprouvette(list_strings)
+                e = Eprouvette(list_strings, max_doses=4)
                 p.add_eprouvette(e)
 
             self.assertEqual(p.is_done, test[1])

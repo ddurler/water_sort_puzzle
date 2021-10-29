@@ -81,16 +81,16 @@ class Puzzle:
 
         # Vérifie que la somme des doses pour chaque liquide est un multiple de la taille des éprouvettes
         for nb_doses_liquide in compteur.values():
-            if nb_doses_liquide % Eprouvette.MAX_DOSES != 0:
+            if nb_doses_liquide % Eprouvette.classe_max_doses != 0:
                 return False
 
         # Décompte des doses vides dans les éprouvettes
         nb_doses_vides = 0
         for eprouvette in self:
-            nb_doses_vides += Eprouvette.MAX_DOSES - len(eprouvette)
+            nb_doses_vides += Eprouvette.classe_max_doses - len(eprouvette)
 
         # Vérifie qu'on a au moins le contenu d'une éprouvette vide
-        if nb_doses_vides < Eprouvette.MAX_DOSES:
+        if nb_doses_vides < Eprouvette.classe_max_doses:
             return False
 
         # Tout est OK

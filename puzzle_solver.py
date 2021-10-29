@@ -114,9 +114,6 @@ class PuzzleSolver:
 
 if __name__ == "__main__":
 
-    # Les puzzles ici sont prévus pour des éprouvettes contenant jusqu'à 4 doses de liquide différent.
-    assert Eprouvette.MAX_DOSES == 4
-
     """
     Ici, chaque puzzle est représenté par une séquence de chaînes de caractères.
     Chaque lettre d'une chaîne de caractère représente une dose d'un liquide identifié par la lettre.
