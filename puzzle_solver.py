@@ -71,7 +71,9 @@ class PuzzleSolver:
         while not self.puzzle_chains_todo.empty():
             nb_loops += 1
             if verbose and nb_loops % 10 == 0:
-                print(f"Solving todo={self.puzzle_chains_todo.qsize()}, done={len(self.puzzle_chains_done)}...")
+                print(
+                    f"Solving todo={self.puzzle_chains_todo.qsize()}, done={len(self.puzzle_chains_done)}..."
+                )
             p = self.puzzle_chains_todo.get()
             if (ret := self._explore_puzzle_chain(p)) is not None:
                 return ret  # Solution found
@@ -118,58 +120,76 @@ class PuzzleSolver:
 
 if __name__ == "__main__":
 
-    """
-    Ici, chaque puzzle est représenté par une séquence de chaînes de caractères.
-    Chaque lettre d'une chaîne de caractère représente une dose d'un liquide identifié par la lettre.
+    import time
 
-    Par exemple:
-        {"AABB", "BBAA", ""}
-        représente un puzzle avec 3 éprouvettes.
-        Dans la première éprouvette "AABB", on a 2 doses de liquide 'A' et 2 doses de liquide 'B' au dessus.
-        La deuxième éprouvette "BBAA" contient l'inverse.
-        La troisième et dernière éprouvette du puzzle est vide ""
-    """
-
-    puzzles = [
-        ["AABB", "BBAA", ""],
-        ["AABC", "BCCA", "ABBC", ""],
-    ]
-
-    for str_puzzle in puzzles:
-        puzzle: Puzzle = Puzzle()
-        for str_eprouvette in str_puzzle:
-            eprouvette: Eprouvette = Eprouvette(str_eprouvette)
-            puzzle.add_eprouvette(eprouvette)
-
+    def solve_generic(puzzle: Puzzle, verbose=False):
         solver: PuzzleSolver = PuzzleSolver(puzzle)
-        solution: PuzzleChain | None = solver.solve()
+
+        time_start = time.time()
+        solution: PuzzleChain | None = solver.solve(verbose=verbose)
+        time_solving = time.time() - time_start
 
         if solution:
-            print("Solution :")
+            print(f"Solution (en {time_solving:.3f} secs) :")
             print(solution.show_puzzle_chains())
         else:
             print(f"Non résolu : {puzzle}\n")
 
+    def solve_puzzle1():
+        """
+        Ici, chaque puzzle est représenté par une séquence de chaînes de caractères.
+        Chaque lettre d'une chaîne de caractère représente une dose d'un liquide identifié par la lettre.
 
-    puzzle = Puzzle([
-        Eprouvette(['vert', 'rose', 'jaune', 'gris foncé']),
-        Eprouvette(['gris', 'jaune', 'bleu clair', 'bleu clair']),
-        Eprouvette(['gris', 'rouge', 'gris', 'rouge']),
-        Eprouvette(['vert', 'gris foncé', 'orange', 'vert']),
-        Eprouvette(['orange', 'rose', 'rose', 'orange']),
-        Eprouvette(['jaune', 'violet', 'gris', 'violet']),
-        Eprouvette(['bleu clair', 'rose', 'violet', 'jaune']),
-        Eprouvette(['bleu clair', 'violet', 'orange', 'gris foncé']),
-        Eprouvette(['gris foncé', 'rouge', 'vert', 'rouge']),
-        Eprouvette([]),
-        Eprouvette([]),
-    ])
+        Par exemple:
+            {"AABB", "BBAA", ""}
+            représente un puzzle avec 3 éprouvettes.
+            Dans la première éprouvette "AABB", on a 2 doses de liquide 'A' et 2 doses de liquide 'B' au dessus.
+            La deuxième éprouvette "BBAA" contient l'inverse.
+            La troisième et dernière éprouvette du puzzle est vide ""
+        """
 
-    solver: PuzzleSolver = PuzzleSolver(puzzle)
-    solution: PuzzleChain | None = solver.solve(verbose=True)
+        puzzles = [
+            ["AABB", "BBAA", ""],
+            ["AABC", "BCCA", "ABBC", ""],
+        ]
 
-    if solution:
-        print("Solution :")
-        print(solution.show_puzzle_chains())
-    else:
-        print(f"Non résolu : {puzzle}\n")
+        for str_puzzle in puzzles:
+            puzzle: Puzzle = Puzzle()
+            for str_eprouvette in str_puzzle:
+                eprouvette: Eprouvette = Eprouvette(str_eprouvette)
+                puzzle.add_eprouvette(eprouvette)
+            solve_generic((puzzle))
+
+    def solve_puzzle2():
+        VERT = 0
+        ROSE = 1
+        JAUNE = 2
+        GRIS_FONCE = 4
+        GRIS = 5
+        BLEU_CLAIR = 6
+        ROUGE = 7
+        ORANGE = 8
+        VIOLET = 9
+
+        solve_generic(
+            Puzzle(
+                [
+                    Eprouvette([VERT, ROSE, JAUNE, GRIS_FONCE]),
+                    Eprouvette([GRIS, JAUNE, BLEU_CLAIR, BLEU_CLAIR]),
+                    Eprouvette([GRIS, ROUGE, GRIS, ROUGE]),
+                    Eprouvette([VERT, GRIS_FONCE, ORANGE, VERT]),
+                    Eprouvette([ORANGE, ROSE, ROSE, ORANGE]),
+                    Eprouvette([JAUNE, VIOLET, GRIS, VIOLET]),
+                    Eprouvette([BLEU_CLAIR, ROSE, VIOLET, JAUNE]),
+                    Eprouvette([BLEU_CLAIR, VIOLET, ORANGE, GRIS_FONCE]),
+                    Eprouvette([GRIS_FONCE, ROUGE, VERT, ROUGE]),
+                    Eprouvette([]),
+                    Eprouvette([]),
+                ]
+            ),
+            verbose=True,
+        )
+
+    # Main
+    # solve_puzzle1()
+    solve_puzzle2()
