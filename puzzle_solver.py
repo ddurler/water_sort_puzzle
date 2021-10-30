@@ -55,7 +55,7 @@ class PuzzleSolver:
             raise ValueError(f"Puzzle inconsistant : {puzzle}")
         self.puzzle: Puzzle = puzzle.clone()
 
-    def solve(self) -> PuzzleChain | None:
+    def solve(self, verbose=False) -> PuzzleChain | None:
         """Résout le puzzle."""
         # Liste des puzzles à examiner
         # On initialise cette liste avec le puzzle d'origine qui n'a pas de prédécesseur
@@ -67,7 +67,11 @@ class PuzzleSolver:
         )
         # Liste des puzzles déjà examinés (vide au début de la résolution)
         self.puzzle_chains_done: List[PuzzleChain] = []
+        nb_loops = 0
         while not self.puzzle_chains_todo.empty():
+            nb_loops += 1
+            if verbose and nb_loops % 10 == 0:
+                print(f"Solving todo={self.puzzle_chains_todo.qsize()}, done={len(self.puzzle_chains_done)}")
             p = self.puzzle_chains_todo.get()
             if (ret := self._explore_puzzle_chain(p)) is not None:
                 return ret  # Solution found
@@ -126,22 +130,46 @@ if __name__ == "__main__":
         La troisième et dernière éprouvette du puzzle est vide ""
     """
 
-    puzzles = [
-        ["AABB", "BBAA", ""],
-        ["AABC", "BCCA", "ABBC", ""],
-    ]
+    # puzzles = [
+    #     ["AABB", "BBAA", ""],
+    #     ["AABC", "BCCA", "ABBC", ""],
+    # ]
 
-    for str_puzzle in puzzles:
-        puzzle: Puzzle = Puzzle()
-        for str_eprouvette in str_puzzle:
-            eprouvette: Eprouvette = Eprouvette(str_eprouvette)
-            puzzle.add_eprouvette(eprouvette)
+    # for str_puzzle in puzzles:
+    #     puzzle: Puzzle = Puzzle()
+    #     for str_eprouvette in str_puzzle:
+    #         eprouvette: Eprouvette = Eprouvette(str_eprouvette)
+    #         puzzle.add_eprouvette(eprouvette)
 
-        solver: PuzzleSolver = PuzzleSolver(puzzle)
-        solution: PuzzleChain | None = solver.solve()
+    #     solver: PuzzleSolver = PuzzleSolver(puzzle)
+    #     solution: PuzzleChain | None = solver.solve()
 
-        if solution:
-            print("Solution :")
-            print(solution.show_puzzle_chains())
-        else:
-            print(f"Non résolu : {puzzle}\n")
+    #     if solution:
+    #         print("Solution :")
+    #         print(solution.show_puzzle_chains())
+    #     else:
+    #         print(f"Non résolu : {puzzle}\n")
+
+
+    puzzle = Puzzle([
+        Eprouvette(['vert', 'rose', 'jaune', 'gris foncé']),
+        Eprouvette(['gris', 'jaune', 'bleu clair', 'bleu clair']),
+        Eprouvette(['gris', 'rouge', 'gris', 'rouge']),
+        Eprouvette(['vert', 'gris foncé', 'orange', 'vert']),
+        Eprouvette(['orange', 'rose', 'rose', 'orange']),
+        Eprouvette(['jaune', 'violet', 'gris', 'violet']),
+        Eprouvette(['bleu clair', 'rose', 'violet', 'jaune']),
+        Eprouvette(['bleu clair', 'violet', 'orange', 'gris foncé']),
+        Eprouvette(['gris foncé', 'rouge', 'vert', 'rouge']),
+        Eprouvette([]),
+        Eprouvette([]),
+    ])
+
+    solver: PuzzleSolver = PuzzleSolver(puzzle)
+    solution: PuzzleChain | None = solver.solve(verbose=True)
+
+    if solution:
+        print("Solution :")
+        print(solution.show_puzzle_chains())
+    else:
+        print(f"Non résolu : {puzzle}\n")
