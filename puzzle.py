@@ -15,21 +15,28 @@ class Puzzle:
     Un puzzle contient des @see Eprouvette.
 
     On peut créer le puzzle en indiquant une liste d'éprouvette.
+    Par défaut la taille (nombre de doses) des éprouvettes est de 4 mais on peut redéfinir ce nombre pour
+    toutes les éprouvettes du puzzle.
     On peut compléter le puzzle avec la méthode @see add_eprouvette
 
     La propriété @see is_consistant permet de vérifier que le puzzle est consistant par rapport au
     contenu des éprouvettes
     """
 
-    def __init__(self, epouvettes: List[Eprouvette] | None = None) -> None:
+    def __init__(
+        self, epouvettes: List[Eprouvette] | None = None, eprouvette_max_len: int = 4
+    ) -> None:
+        self.eprouvette_max_len: int = int(eprouvette_max_len)
         self._eprouvettes: List[Eprouvette] = []
         if epouvettes:
             for eprouvette in epouvettes:
                 self.add_eprouvette(eprouvette)
+                eprouvette.max_len = eprouvette_max_len
 
     def add_eprouvette(self, eprouvette: Eprouvette) -> None:
         """Ajoute une éprouvette au puzzle."""
         assert isinstance(eprouvette, Eprouvette)
+        eprouvette.max_len = self.eprouvette_max_len
         self._eprouvettes.append(eprouvette)
 
     def __len__(self) -> int:
@@ -100,16 +107,16 @@ class Puzzle:
 
         # Vérifie que la somme des doses pour chaque liquide est un multiple de la taille des éprouvettes
         for nb_doses_liquide in compteur.values():
-            if nb_doses_liquide % Eprouvette.classe_max_doses != 0:
+            if nb_doses_liquide % self.eprouvette_max_len != 0:
                 return False
 
         # Décompte des doses vides dans les éprouvettes
         nb_doses_vides = 0
         for eprouvette in self:
-            nb_doses_vides += Eprouvette.classe_max_doses - len(eprouvette)
+            nb_doses_vides += self.eprouvette_max_len - len(eprouvette)
 
         # Vérifie qu'on a au moins le contenu d'une éprouvette vide
-        if nb_doses_vides < Eprouvette.classe_max_doses:
+        if nb_doses_vides < self.eprouvette_max_len:
             return False
 
         # Tout est OK
@@ -133,7 +140,7 @@ class Puzzle:
         for eprouvette in self:
             copy_list_eprouvettes.append(eprouvette.clone())
 
-        return Puzzle(copy_list_eprouvettes)
+        return Puzzle(copy_list_eprouvettes, eprouvette_max_len=self.eprouvette_max_len)
 
     def __repr__(self):
         ret = ""

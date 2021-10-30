@@ -16,51 +16,46 @@ class EprouvetteError(Exception):
 class Eprouvette:
     """
     Une éprouvette contient des doses de liquide.
-    Toutes les éprouvettes peuvent contenir le même nombre de doses qui est calculé dynamiquement s'il
-    n'est pas explicitement défini avec un constructeur d'Eprouvette.
 
     Le contenu d'une éprouvette est une séquence d'objets où chaque objet identifie un liquide particulier.
 
-    Contenu = [] si l'éprouvette est vide
-    Contenu = ['X'] si l'éprouvette contient une dose de 'X'
-    Contenu = ['X', 'Y', 'Y'] si l'éprouvette contient une dose de 'X' et 2 doses de 'Y' au dessus
+    Le nombre de doses avec du liquide est donné par la fonction len().
+    Le nombre max de doses avant que l'éprouvette ne déborde est donné par la propriété max_len.
+    Par défaut, max_len vaut None, ce qui signifie que l'éprouvette ne débordera jamais.
+
+    _doses = [] si l'éprouvette est vide
+    _doses = ['X'] si l'éprouvette contient une dose de 'X'
+            Ici on a 1 dose d'un liquide dans l'éprouvette
+    _doses = ['X', 'Y', 'Y'] si l'éprouvette contient une dose de 'X' et 2 doses de 'Y' au dessus
+            Ici on a 3 doses avec 2 liquides différents dans l'éprouvette
     """
 
-    # Nombre d'instances d'Eprouvette pour calculer le nombre de doses commun
-    classe_nb_instances: int = 0
-    # Le nombre de doses doit être le même pour toutes les éprouvettes
-    classe_max_doses: int = 0
-
-    def __init__(self, doses: Sequence, max_doses=None):
-        if max_doses is None:
-            max_doses = len(doses)
-        else:
-            if (
-                Eprouvette.classe_max_doses > 0
-                and max_doses < Eprouvette.classe_max_doses
-            ):
-                raise EprouvetteError(
-                    f"{max_doses} inconsistant avec {Eprouvette.classe_max_doses} déjà défini pour les éprouvettes"
-                )
-        if len(doses) > max_doses:
-            raise EprouvetteError(
-                f"{doses} : Inconsistant avec {max_doses} dans l'éprouvette"
-            )
+    def __init__(self, doses: Sequence, max_len=None):
+        self._max_len = None
         self._doses = [dose for dose in doses if dose is not None]
+        if max_len is not None:
+            self.max_len = max_len
 
-        # Mise à jour du nombre de doses pour toutes les instances en cours
-        if Eprouvette.classe_max_doses < max_doses:
-            Eprouvette.classe_max_doses = max_doses
+    @property
+    def max_len(self) -> int | None:
+        return self._max_len
 
-        # Mise à jour du nombre d'instances d'Eprouvette
-        Eprouvette.classe_nb_instances += 1
-
-    def __del__(self):
-        """Destructeur."""
-        Eprouvette.classe_nb_instances -= 1
-        if Eprouvette.classe_nb_instances <= 0:
-            Eprouvette.classe_nb_instances = 0
-            Eprouvette.classe_max_doses = 0
+    @max_len.setter
+    def max_len(self, value: int | None):
+        if value is None:
+            self._max_len = None
+        else:
+            value = int(value)
+            if value < 0:
+                raise EprouvetteError(
+                    f"max_len = {value} impossible pour une éprouvette"
+                )
+            self._max_len = int(value)
+            if value < len(self):
+                raise EprouvetteError(
+                    f"max_len = {value} impossible, il y a déjà {len(self)} doses dans l'éprouvette"
+                )
+            self._max_len = value
 
     @property
     def is_vide(self) -> bool:
@@ -70,10 +65,12 @@ class Eprouvette:
     @property
     def is_pleine(self) -> bool:
         """@return True si l'éprouvette est pleine."""
-        return len(self._doses) == Eprouvette.classe_max_doses
+        if self.max_len is None:
+            return False
+        return len(self._doses) == self.max_len
 
     def __len__(self) -> int:
-        """Implémente len() pour une éprouvette -> Nombre total de doses dans l'éprouvette [entre 0 et classe_max_doses]."""
+        """Implémente len() pour une éprouvette -> Nombre de doses dans l'éprouvette."""
         return len(self._doses)
 
     @property
@@ -83,7 +80,7 @@ class Eprouvette:
 
     @property
     def nb_different_liquides(self) -> int:
-        """Nombre de liquides différents dans l'éprouvette [entre 0 et classe_max_doses]."""
+        """Nombre de liquides différents dans l'éprouvette."""
         return len(self.liquides)
 
     @property
@@ -97,9 +94,9 @@ class Eprouvette:
         """Liquide dans la i-eme dose de l'éprouvette."""
         if index < 0:
             return self._doses[-1]
-        if index >= Eprouvette.classe_max_doses:
+        if self.max_len is not None and index >= self.max_len:
             raise EprouvetteError(
-                f"Index = {index} : On ne peut pas avoir plus de {Eprouvette.classe_max_doses} dans l'éprouvette"
+                f"Index = {index} : On ne peut pas avoir plus de {self.max_len} dans l'éprouvette"
             )
         if index >= len(self):
             return None
@@ -176,7 +173,7 @@ class Eprouvette:
     def clone(self) -> Eprouvette:
         """Crée et retourne une copie clone de l'éprouvette."""
         copy_list_doses = self._doses.copy()
-        return Eprouvette(copy_list_doses)
+        return Eprouvette(copy_list_doses, max_len=self.max_len)
 
     def __repr__(self):
         return f"<{self._doses}>"

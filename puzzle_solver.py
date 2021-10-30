@@ -191,5 +191,5 @@ if __name__ == "__main__":
         )
 
     # Main
-    # solve_puzzle1()
+    solve_puzzle1()
     solve_puzzle2()

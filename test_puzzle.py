@@ -8,7 +8,7 @@ from puzzle import Puzzle
 
 class TestPuzzle(unittest.TestCase):
     def test_puzzle(self):
-        p = Puzzle([Eprouvette(["R", "R"]), Eprouvette(["R"])])
+        p = Puzzle([Eprouvette(["R", "R"]), Eprouvette(["R"])], eprouvette_max_len=4)
         p.add_eprouvette(Eprouvette(["R"]))
 
     def test_puzzle_len(self):
@@ -21,7 +21,7 @@ class TestPuzzle(unittest.TestCase):
         e_0 = Eprouvette(["A"])
         e_1 = Eprouvette(["B"])
         e_2 = Eprouvette(["C"])
-        p = Puzzle([e_0, e_1, e_2])
+        p = Puzzle([e_0, e_1, e_2], eprouvette_max_len=4)
         self.assertEqual(p[0], e_0)
         self.assertEqual(p[1], e_1)
         self.assertEqual(p[2], e_2)
@@ -81,7 +81,7 @@ class TestPuzzle(unittest.TestCase):
                     self.assertFalse(p1.is_same_as(p0))
 
     def test_puzzle_clone(self):
-        p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])])
+        p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])], eprouvette_max_len=4)
         p2 = p.clone()
         self.assertTrue(p == p2)
         self.assertFalse(p != p2)
@@ -90,7 +90,7 @@ class TestPuzzle(unittest.TestCase):
         e_a = Eprouvette(["A"])
         e_b = Eprouvette(["B"])
         e_c = Eprouvette(["C"])
-        p = Puzzle([e_a, e_b, e_c])
+        p = Puzzle([e_a, e_b, e_c], eprouvette_max_len=4)
         permutations = [perm for perm in p.iter_permutations()]
         self.assertEqual(len(permutations), 6)
         self.assertIn((e_a, e_b), permutations)
@@ -101,9 +101,9 @@ class TestPuzzle(unittest.TestCase):
         self.assertIn((e_c, e_b), permutations)
 
     def test_puzzle_is_consistant_nb_doses_liquide(self):
-        p = Puzzle()
+        p = Puzzle(eprouvette_max_len=4)
         for nb_doses in range(4):
-            p.add_eprouvette(Eprouvette(["A"], max_doses=4))
+            p.add_eprouvette(Eprouvette(["A"]))
             if nb_doses == 3:
                 self.assertTrue(p.is_consistant)
             else:
@@ -112,7 +112,7 @@ class TestPuzzle(unittest.TestCase):
     def test_puzzle_is_consistant_nb_doses_vides(self):
         list_liquides = ["A" for _ in range(4)]
         e = Eprouvette(list_liquides)
-        p = Puzzle([e])
+        p = Puzzle([e], eprouvette_max_len=4)
         self.assertFalse(p.is_consistant)
 
     def test_puzzle_is_done(self):
@@ -132,9 +132,9 @@ class TestPuzzle(unittest.TestCase):
         # Ce test est prévu pour des éprouvettes de 4 doses
 
         for test in tests:
-            p = Puzzle()
+            p = Puzzle(eprouvette_max_len=4)
             for list_strings in test[0]:
-                e = Eprouvette(list_strings, max_doses=4)
+                e = Eprouvette(list_strings)
                 p.add_eprouvette(e)
 
             self.assertEqual(p.is_done, test[1])
