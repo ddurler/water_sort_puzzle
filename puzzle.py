@@ -15,28 +15,20 @@ class Puzzle:
     Un puzzle contient des @see Eprouvette.
 
     On peut créer le puzzle en indiquant une liste d'éprouvette.
-    Par défaut la taille (nombre de doses) des éprouvettes est de 4 mais on peut redéfinir ce nombre pour
-    toutes les éprouvettes du puzzle.
     On peut compléter le puzzle avec la méthode @see add_eprouvette
 
     La propriété @see is_consistant permet de vérifier que le puzzle est consistant par rapport au
     contenu des éprouvettes
     """
 
-    def __init__(
-        self, epouvettes: List[Eprouvette] | None = None, eprouvette_max_len: int = 4
-    ) -> None:
-        self.eprouvette_max_len: int = int(eprouvette_max_len)
+    def __init__(self, epouvettes: List[Eprouvette] | None = None) -> None:
         self._eprouvettes: List[Eprouvette] = []
         if epouvettes:
             for eprouvette in epouvettes:
                 self.add_eprouvette(eprouvette)
-                eprouvette.max_len = eprouvette_max_len
 
     def add_eprouvette(self, eprouvette: Eprouvette) -> None:
         """Ajoute une éprouvette au puzzle."""
-        assert isinstance(eprouvette, Eprouvette)
-        eprouvette.max_len = self.eprouvette_max_len
         self._eprouvettes.append(eprouvette)
 
     def __len__(self) -> int:
@@ -46,15 +38,6 @@ class Puzzle:
     def __getitem__(self, index: int) -> Eprouvette:
         """i-eme eprouvette du puzzle."""
         return self._eprouvettes[index]
-
-    def __eq__(self, other: object) -> bool:
-        """Implémente l'opérateur == entre les puzzles."""
-        if not isinstance(other, Puzzle) or len(self) != len(other):
-            return False
-        for e0, e1 in zip(self, other):
-            if e0 != e1:
-                return False
-        return True
 
     def is_same_as(self, other: Puzzle) -> bool:
         """
@@ -66,10 +49,10 @@ class Puzzle:
             return False
         # Table des éprouvettes identifiées idem dans other puzzle
         table: List[bool] = [False for _ in range(len(self))]
-        for e0 in self:
+        for e0 in self.iter_eprouvettes():
             found_in_other = False
-            for i, e1 in enumerate(other):
-                if not table[i] and e0 == other[i]:
+            for i, e1 in enumerate(other.iter_eprouvettes()):
+                if not table[i] and e0.is_same_as(other[i]):
                     table[i] = True
                     found_in_other = True
                     break
@@ -77,13 +60,14 @@ class Puzzle:
                 return False
         return True
 
-    def __iter__(self):
+    def iter_eprouvettes(self):
         """Implémente un itérateur sur toutes les éprouvettes du puzzle."""
-        return self._eprouvettes.__iter__()
+        for eprouvette in self._eprouvettes:
+            yield eprouvette
 
     def iter_permutations(self) -> Generator[Tuple[Any, ...], None, None]:
         """Iterator sur toutes les combinaisons Tuple[Eprouvette, Eprouvette] du puzzle."""
-        for permutation in permutations(self, 2):
+        for permutation in permutations(self.iter_eprouvettes(), 2):
             yield permutation
 
     @property
@@ -101,22 +85,22 @@ class Puzzle:
 
         # Somme toutes les doses de liquides dans toutes les éprouvettes
         compteur: Counter = Counter()
-        for eprouvette in self:
-            for dose_liquide in eprouvette:
+        for eprouvette in self.iter_eprouvettes():
+            for dose_liquide in eprouvette.iter_doses():
                 compteur[dose_liquide] += 1
 
         # Vérifie que la somme des doses pour chaque liquide est un multiple de la taille des éprouvettes
         for nb_doses_liquide in compteur.values():
-            if nb_doses_liquide % self.eprouvette_max_len != 0:
+            if nb_doses_liquide % Eprouvette.MAX_DOSES != 0:
                 return False
 
         # Décompte des doses vides dans les éprouvettes
         nb_doses_vides = 0
-        for eprouvette in self:
-            nb_doses_vides += self.eprouvette_max_len - len(eprouvette)
+        for eprouvette in self.iter_eprouvettes():
+            nb_doses_vides += Eprouvette.MAX_DOSES - eprouvette.nb_doses
 
         # Vérifie qu'on a au moins le contenu d'une éprouvette vide
-        if nb_doses_vides < self.eprouvette_max_len:
+        if nb_doses_vides < Eprouvette.MAX_DOSES:
             return False
 
         # Tout est OK
@@ -126,7 +110,7 @@ class Puzzle:
     def is_done(self) -> bool:
         """@return True si le puzzle est terminé."""
         eprouvette: Eprouvette
-        for eprouvette in self:
+        for eprouvette in self.iter_eprouvettes():
             if not (
                 eprouvette.is_vide
                 or (eprouvette.is_pleine and len(eprouvette.liquides) == 1)
@@ -137,14 +121,14 @@ class Puzzle:
     def clone(self) -> Puzzle:
         """Crée et retourne une copie clone du puzzle."""
         copy_list_eprouvettes: List[Eprouvette] = []
-        for eprouvette in self:
+        for eprouvette in self.iter_eprouvettes():
             copy_list_eprouvettes.append(eprouvette.clone())
 
-        return Puzzle(copy_list_eprouvettes, eprouvette_max_len=self.eprouvette_max_len)
+        return Puzzle(copy_list_eprouvettes)
 
     def __repr__(self):
         ret = ""
-        for n, eprouvette in enumerate(self):
+        for n, eprouvette in enumerate(self.iter_eprouvettes()):
             if ret:
                 ret += ", "
             ret += f"#{n + 1}{eprouvette}"

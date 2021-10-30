@@ -3,7 +3,7 @@
 # Import pour pouvoir faire du typing :Eprouvette dans la classe Eprouvette
 from __future__ import annotations
 
-from typing import Sequence, Set, Any
+from typing import Sequence, List, Set, Any
 
 
 class EprouvetteError(Exception):
@@ -15,69 +15,43 @@ class EprouvetteError(Exception):
 
 class Eprouvette:
     """
-    Une éprouvette contient des doses de liquide.
+    Une éprouvette contient jusqu'à 4 doses de liquide.
 
     Le contenu d'une éprouvette est une séquence d'objets où chaque objet identifie un liquide particulier.
 
-    Le nombre de doses avec du liquide est donné par la fonction len().
-    Le nombre max de doses avant que l'éprouvette ne déborde est donné par la propriété max_len.
-    Par défaut, max_len vaut None, ce qui signifie que l'éprouvette ne débordera jamais.
-
-    _doses = [] si l'éprouvette est vide
-    _doses = ['X'] si l'éprouvette contient une dose de 'X'
+    doses = [None, None, None, None] si l'éprouvette est vide (nb_doses = 0)
+    doses = ['X', None, None, None] si l'éprouvette contient une dose de 'X' (nb_doses = 1)
             Ici on a 1 dose d'un liquide dans l'éprouvette
-    _doses = ['X', 'Y', 'Y'] si l'éprouvette contient une dose de 'X' et 2 doses de 'Y' au dessus
+    doses = ['X', 'Y', 'Y', None] si l'éprouvette contient une dose de 'X' et 2 doses de 'Y' au dessus (nb_doses = 3)
             Ici on a 3 doses avec 2 liquides différents dans l'éprouvette
     """
 
-    def __init__(self, doses: Sequence, max_len=None):
-        self._max_len = None
-        self._doses = [dose for dose in doses if dose is not None]
-        self._len_doses = len(self._doses)  # speeding further computation
-        if max_len is not None:
-            self.max_len = max_len
+    MAX_DOSES = 4
 
-    @property
-    def max_len(self) -> int | None:
-        return self._max_len
-
-    @max_len.setter
-    def max_len(self, value: int | None):
-        if value is None:
-            self._max_len = None
-        else:
-            value = int(value)
-            if value < 0:
-                raise EprouvetteError(
-                    f"max_len = {value} impossible pour une éprouvette"
-                )
-            self._max_len = int(value)
-            if value < len(self):
-                raise EprouvetteError(
-                    f"max_len = {value} impossible, il y a déjà {len(self)} doses dans l'éprouvette"
-                )
-            self._max_len = value
+    def __init__(self, doses: Sequence):
+        self.doses: List[Any] = [
+            None,
+        ] * Eprouvette.MAX_DOSES
+        self.nb_doses = 0
+        for dose in doses:
+            if dose is not None:
+                self.doses[self.nb_doses] = dose
+                self.nb_doses += 1
 
     @property
     def is_vide(self) -> bool:
         """@return True si l'éprouvette est vide."""
-        return self._len_doses == 0
+        return self.nb_doses == 0
 
     @property
     def is_pleine(self) -> bool:
         """@return True si l'éprouvette est pleine."""
-        if self.max_len is None:
-            return False
-        return self._len_doses == self.max_len
-
-    def __len__(self) -> int:
-        """Implémente len() pour une éprouvette -> Nombre de doses dans l'éprouvette."""
-        return self._len_doses
+        return self.nb_doses == Eprouvette.MAX_DOSES
 
     @property
     def liquides(self) -> Set[Any]:
         """@return Set des différents liquides dans l'éprouvette."""
-        return set(self._doses)
+        return set(self.doses[: self.nb_doses])
 
     @property
     def nb_different_liquides(self) -> int:
@@ -87,35 +61,21 @@ class Eprouvette:
     @property
     def top_liquide(self) -> Any | None:
         """Liquide du dessus dans l'éprouvette."""
-        if self.is_vide:
+        if self.nb_doses == 0:
             return None
-        return self._doses[-1]
+        return self.doses[self.nb_doses - 1]
 
-    def __getitem__(self, index: int) -> Any | None:
-        """Liquide dans la i-eme dose de l'éprouvette."""
-        if index < 0:
-            return self._doses[-1]
-        if self.max_len is not None and index >= self.max_len:
-            raise EprouvetteError(
-                f"Index = {index} : On ne peut pas avoir plus de {self.max_len} dans l'éprouvette"
-            )
-        if index >= len(self):
-            return None
-        return self._doses[index]
-
-    def __iter__(self):
+    def iter_doses(self):
         """Implémente un itérateur sur toutes les doses de l'éprouvette."""
-        return self._doses.__iter__()
+        for i in range(self.nb_doses):
+            yield self.doses[i]
 
-    def __eq__(self, other: object) -> bool:
-        """Implémente l'opérateur == entre 2 éprouvettes."""
-        if not isinstance(other, Eprouvette):
+    def is_same_as(self, other: Eprouvette) -> bool:
+        """@return True si les éprouvettes sont identiques."""
+        if self.nb_doses != other.nb_doses:
             return False
-        if len(self) != len(other):
-            return False
-        # + pythonique (mais non optimisé):  for liquide1, liquide2 in zip(self, other):
-        for i in range(self._len_doses):
-            if self[i] != other[i]:
+        for i in range(self.nb_doses):
+            if self.doses[i] != other.doses[i]:
                 return False
         return True
 
@@ -125,48 +85,45 @@ class Eprouvette:
             raise EprouvetteError(
                 "On ne peut pas retirer une dose d'une éprouvette vide"
             )
-        self._len_doses -= 1
-        return self._doses.pop()
+        ret = self.doses[self.nb_doses - 1]
+        self.doses[self.nb_doses - 1] = None
+        self.nb_doses -= 1
+        return ret
 
     def can_push_dose(self, liquide: Any) -> bool:
         """@return True si liquide peut-être versé dans l'éprouvette."""
-        if liquide is None:  # Cas trivial
-            return False
-        if self.is_vide:
+        if self.nb_doses == 0:
             return True
-        elif self.is_pleine:
+        if self.nb_doses == Eprouvette.MAX_DOSES:
             return False
-        # Sinon selon liquide au sommet de l'éprouvette
-        return liquide == self.top_liquide
+        return self.doses[self.nb_doses - 1] == liquide
 
     def push_dose(self, liquide: Any) -> None:
         """Ajoute une dose de liquide dans l'éprouvette."""
-        if liquide is None:
-            raise EprouvetteError(f"Impossible d'ajouter None dans l'éprouvette {self}")
         if not self.can_push_dose(liquide):
             raise EprouvetteError(
                 f"Impossible d'ajouter du {liquide} dans l'éprouvette {self}"
             )
-        self._len_doses += 1
-        self._doses.append(liquide)
+        self.doses[self.nb_doses] = liquide
+        self.nb_doses += 1
 
     def is_possible_verser_une_dose_dans(self, destination: Eprouvette) -> bool:
         """@return True si au moins une dose de liquide peut être versée vers l'éprouvette destination."""
-        assert isinstance(destination, Eprouvette)
-        if self.is_vide:
+        if self.nb_doses == 0:
             return False
-        if destination.is_vide:
+        if destination.nb_doses == 0:
             return True
-        if destination.is_pleine:
+        if destination.nb_doses == Eprouvette.MAX_DOSES:
             return False
         # Si les liquides sont les mêmes
-        return self.top_liquide == destination.top_liquide
+        return (
+            self.doses[self.nb_doses - 1] == destination.doses[destination.nb_doses - 1]
+        )
 
     def verser_dans(self, destination: Eprouvette) -> int:
         """Verse toutes les doses possibles vers l'éprouvette destination.
         @return le nombre de doses versées
         """
-        assert isinstance(destination, Eprouvette)
         nb_doses = 0
         while self.is_possible_verser_une_dose_dans(destination):
             liquide = self.pop_dose()
@@ -176,8 +133,8 @@ class Eprouvette:
 
     def clone(self) -> Eprouvette:
         """Crée et retourne une copie clone de l'éprouvette."""
-        copy_list_doses = self._doses.copy()
-        return Eprouvette(copy_list_doses, max_len=self.max_len)
+        copy_list_doses = self.doses.copy()
+        return Eprouvette(copy_list_doses)
 
     def __repr__(self):
-        return f"<{self._doses}>"
+        return f"<{self.doses[:self.nb_doses]}>"

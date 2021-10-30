@@ -71,9 +71,13 @@ class PuzzleSolver:
         while not self.puzzle_chains_todo.empty():
             nb_loops += 1
             if verbose and nb_loops % 10 == 0:
-                print(
-                    f"Solving todo={self.puzzle_chains_todo.qsize()}, done={len(self.puzzle_chains_done)}..."
-                )
+                nb_loops = 0
+                nb_done = len(self.puzzle_chains_done)
+                nb_todo = self.puzzle_chains_todo.qsize()
+                if nb_done + nb_todo > 0:
+                    print(
+                        f"Solving todo={nb_todo}, done={nb_done}, {(100 *nb_done) / (nb_done + nb_todo):.1f}%..."
+                    )
             p = self.puzzle_chains_todo.get()
             if (ret := self._explore_puzzle_chain(p)) is not None:
                 return ret  # Solution found

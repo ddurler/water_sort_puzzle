@@ -8,7 +8,7 @@ from puzzle import Puzzle
 
 class TestPuzzle(unittest.TestCase):
     def test_puzzle(self):
-        p = Puzzle([Eprouvette(["R", "R"]), Eprouvette(["R"])], eprouvette_max_len=4)
+        p = Puzzle([Eprouvette(["R", "R"]), Eprouvette(["R"])])
         p.add_eprouvette(Eprouvette(["R"]))
 
     def test_puzzle_len(self):
@@ -21,7 +21,7 @@ class TestPuzzle(unittest.TestCase):
         e_0 = Eprouvette(["A"])
         e_1 = Eprouvette(["B"])
         e_2 = Eprouvette(["C"])
-        p = Puzzle([e_0, e_1, e_2], eprouvette_max_len=4)
+        p = Puzzle([e_0, e_1, e_2])
         self.assertEqual(p[0], e_0)
         self.assertEqual(p[1], e_1)
         self.assertEqual(p[2], e_2)
@@ -33,21 +33,20 @@ class TestPuzzle(unittest.TestCase):
         self.assertIn("B", puzzle_repr)
         self.assertIn("C", puzzle_repr)
 
-    def test_puzzle_eq_or_same(self):
+    def test_puzzle_is_same_as(self):
         tests = [
-            {"p0": [""], "p1": [""], "eq": True},
-            {"p0": [""], "p1": ["A"], "eq": False, "same": False},
-            {"p0": ["A"], "p1": [""], "eq": False, "same": False},
-            {"p0": ["A"], "p1": ["A"], "eq": True},
-            {"p0": ["A"], "p1": ["B"], "eq": False, "same": False},
-            {"p0": ["A"], "p1": ["AB", "C"], "eq": False, "same": False},
-            {"p0": ["AB"], "p1": ["B"], "eq": False, "same": False},
-            {"p0": ["AB", "B"], "p1": ["AB", "B"], "eq": True},
-            {"p0": ["AB", "B"], "p1": ["B", "AB"], "eq": False, "same": True},
-            {"p0": ["", "AB", "B"], "p1": ["B", "", "AB"], "eq": False, "same": True},
+            {"p0": [""], "p1": [""], "same": True},
+            {"p0": [""], "p1": ["A"], "same": False},
+            {"p0": ["A"], "p1": [""], "same": False},
+            {"p0": ["A"], "p1": ["A"], "same": True},
+            {"p0": ["A"], "p1": ["B"], "same": False},
+            {"p0": ["A"], "p1": ["AB", "C"], "same": False},
+            {"p0": ["AB"], "p1": ["B"], "same": False},
+            {"p0": ["AB", "B"], "p1": ["AB", "B"], "same": True},
+            {"p0": ["AB", "B"], "p1": ["B", "AB"], "same": True},
+            {"p0": ["", "AB", "B"], "p1": ["B", "", "AB"], "same": True},
         ]
 
-        self.assertFalse(Puzzle() == "Objet_qui_n_est_pas_un_puzzle")
         self.assertFalse(Puzzle().is_same_as("Objet_qui_n_est_pas_un_puzzle"))
 
         for test in tests:
@@ -61,36 +60,23 @@ class TestPuzzle(unittest.TestCase):
                 e = Eprouvette(list_liquide)
                 p1.add_eprouvette(e)
 
-            if test["eq"]:
-                self.assertTrue(p0 == p1)
-                self.assertTrue(p1 == p0)
-                self.assertFalse(p0 != p1)
-                self.assertFalse(p1 != p0)
+            if test["same"]:
                 self.assertTrue(p0.is_same_as(p1))
                 self.assertTrue(p1.is_same_as(p0))
             else:
-                self.assertFalse(p0 == p1)
-                self.assertFalse(p1 == p0)
-                self.assertTrue(p0 != p1)
-                self.assertTrue(p1 != p0)
-                if test["same"]:
-                    self.assertTrue(p0.is_same_as(p1))
-                    self.assertTrue(p1.is_same_as(p0))
-                else:
-                    self.assertFalse(p0.is_same_as(p1))
-                    self.assertFalse(p1.is_same_as(p0))
+                self.assertFalse(p0.is_same_as(p1))
+                self.assertFalse(p1.is_same_as(p0))
 
     def test_puzzle_clone(self):
-        p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])], eprouvette_max_len=4)
+        p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])])
         p2 = p.clone()
-        self.assertTrue(p == p2)
-        self.assertFalse(p != p2)
+        self.assertTrue(p.is_same_as(p2))
 
     def test_puzzle_permutations(self):
         e_a = Eprouvette(["A"])
         e_b = Eprouvette(["B"])
         e_c = Eprouvette(["C"])
-        p = Puzzle([e_a, e_b, e_c], eprouvette_max_len=4)
+        p = Puzzle([e_a, e_b, e_c])
         permutations = [perm for perm in p.iter_permutations()]
         self.assertEqual(len(permutations), 6)
         self.assertIn((e_a, e_b), permutations)
@@ -101,18 +87,18 @@ class TestPuzzle(unittest.TestCase):
         self.assertIn((e_c, e_b), permutations)
 
     def test_puzzle_is_consistant_nb_doses_liquide(self):
-        p = Puzzle(eprouvette_max_len=4)
-        for nb_doses in range(4):
+        p = Puzzle()
+        for nb_doses in range(Eprouvette.MAX_DOSES):
             p.add_eprouvette(Eprouvette(["A"]))
-            if nb_doses == 3:
+            if nb_doses == Eprouvette.MAX_DOSES - 1:
                 self.assertTrue(p.is_consistant)
             else:
                 self.assertFalse(p.is_consistant)
 
     def test_puzzle_is_consistant_nb_doses_vides(self):
-        list_liquides = ["A" for _ in range(4)]
+        list_liquides = ["A" for _ in range(Eprouvette.MAX_DOSES)]
         e = Eprouvette(list_liquides)
-        p = Puzzle([e], eprouvette_max_len=4)
+        p = Puzzle([e])
         self.assertFalse(p.is_consistant)
 
     def test_puzzle_is_done(self):
@@ -130,9 +116,10 @@ class TestPuzzle(unittest.TestCase):
         ]
 
         # Ce test est prévu pour des éprouvettes de 4 doses
+        self.assertEqual(Eprouvette.MAX_DOSES, 4)
 
         for test in tests:
-            p = Puzzle(eprouvette_max_len=4)
+            p = Puzzle()
             for list_strings in test[0]:
                 e = Eprouvette(list_strings)
                 p.add_eprouvette(e)
