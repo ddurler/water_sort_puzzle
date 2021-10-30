@@ -42,12 +42,31 @@ class Puzzle:
 
     def __eq__(self, other: object) -> bool:
         """Implémente l'opérateur == entre les puzzles."""
-        if not isinstance(other, Puzzle):
-            return False
-        if len(self) != len(other):
+        if not isinstance(other, Puzzle) or len(self) != len(other):
             return False
         for e0, e1 in zip(self, other):
             if e0 != e1:
+                return False
+        return True
+
+    def is_same_as(self, other: object) -> bool:
+        """
+        @return True si les 2 puzzles sont similaires
+        (mêmes éprouvettes mais pas forcement dans le même ordre).
+        @see __equ__ pour une stricte identité.
+        """
+        if not isinstance(other, Puzzle) or len(self) != len(other):
+            return False
+        # Table des éprouvettes identifiées idem dans other puzzle
+        table: List[bool] = [False for _ in range(len(self))]
+        for e0 in self:
+            found_in_other = False
+            for i, e1 in enumerate(other):
+                if not table[i] and e0 == other[i]:
+                    table[i] = True
+                    found_in_other = True
+                    break
+            if not found_in_other:
                 return False
         return True
 

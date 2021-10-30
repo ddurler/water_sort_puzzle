@@ -71,7 +71,7 @@ class PuzzleSolver:
         while not self.puzzle_chains_todo.empty():
             nb_loops += 1
             if verbose and nb_loops % 10 == 0:
-                print(f"Solving todo={self.puzzle_chains_todo.qsize()}, done={len(self.puzzle_chains_done)}")
+                print(f"Solving todo={self.puzzle_chains_todo.qsize()}, done={len(self.puzzle_chains_done)}...")
             p = self.puzzle_chains_todo.get()
             if (ret := self._explore_puzzle_chain(p)) is not None:
                 return ret  # Solution found
@@ -86,7 +86,7 @@ class PuzzleSolver:
 
     def is_puzzle_already_done(self, puzzle: Puzzle) -> bool:
         for puzzle_chain in self.puzzle_chains_done:
-            if puzzle == puzzle_chain.puzzle:
+            if puzzle.is_same_as(puzzle_chain.puzzle):
                 return True
         return False
 
@@ -130,25 +130,25 @@ if __name__ == "__main__":
         La troisième et dernière éprouvette du puzzle est vide ""
     """
 
-    # puzzles = [
-    #     ["AABB", "BBAA", ""],
-    #     ["AABC", "BCCA", "ABBC", ""],
-    # ]
+    puzzles = [
+        ["AABB", "BBAA", ""],
+        ["AABC", "BCCA", "ABBC", ""],
+    ]
 
-    # for str_puzzle in puzzles:
-    #     puzzle: Puzzle = Puzzle()
-    #     for str_eprouvette in str_puzzle:
-    #         eprouvette: Eprouvette = Eprouvette(str_eprouvette)
-    #         puzzle.add_eprouvette(eprouvette)
+    for str_puzzle in puzzles:
+        puzzle: Puzzle = Puzzle()
+        for str_eprouvette in str_puzzle:
+            eprouvette: Eprouvette = Eprouvette(str_eprouvette)
+            puzzle.add_eprouvette(eprouvette)
 
-    #     solver: PuzzleSolver = PuzzleSolver(puzzle)
-    #     solution: PuzzleChain | None = solver.solve()
+        solver: PuzzleSolver = PuzzleSolver(puzzle)
+        solution: PuzzleChain | None = solver.solve()
 
-    #     if solution:
-    #         print("Solution :")
-    #         print(solution.show_puzzle_chains())
-    #     else:
-    #         print(f"Non résolu : {puzzle}\n")
+        if solution:
+            print("Solution :")
+            print(solution.show_puzzle_chains())
+        else:
+            print(f"Non résolu : {puzzle}\n")
 
 
     puzzle = Puzzle([

@@ -33,37 +33,53 @@ class TestPuzzle(unittest.TestCase):
         self.assertIn("B", puzzle_repr)
         self.assertIn("C", puzzle_repr)
 
-    def test_puzzle_eq(self):
+    def test_puzzle_eq_or_same(self):
         tests = [
-            [[""], [""], True],
-            [[""], ["A"], False],
-            [["A"], [""], False],
-            [["A"], ["A"], True],
-            [["A"], ["B"], False],
-            [["A"], ["AB", "C"], False],
-            [["AB"], ["B"], False],
-            [["AB", "B"], ["AB", "B"], True],
+            {"p0":[""],        "p1":[""],        "eq": True},
+            {"p0":[""],        "p1":["A"],       "eq": False, "same": False},
+            {"p0":["A"],       "p1":[""],        "eq": False, "same": False},
+            {"p0":["A"],       "p1":["A"],       "eq": True},
+            {"p0":["A"],       "p1":["B"],       "eq": False ,"same": False},
+            {"p0":["A"],       "p1":["AB", "C"], "eq": False, "same": False},
+            {"p0":["AB"],      "p1":["B"],       "eq": False, "same": False},
+            {"p0":["AB", "B"], "p1":["AB", "B"], "eq": True},
+            {"p0":["AB", "B"], "p1":["B", "AB"], "eq": False, "same": True},
+            {"p0":["", "AB", "B"], "p1":["B", "", "AB"], "eq": False, "same": True},
         ]
 
         self.assertFalse(Puzzle() == "Objet_qui_n_est_pas_un_puzzle")
+        self.assertFalse(Puzzle().is_same_as("Objet_qui_n_est_pas_un_puzzle"))
 
         for test in tests:
             p0 = Puzzle()
-            for list_liquide in test[0]:
+            for list_liquide in test["p0"]:
                 e = Eprouvette(list_liquide)
                 p0.add_eprouvette(e)
 
             p1 = Puzzle()
-            for list_liquide in test[1]:
+            for list_liquide in test["p1"]:
                 e = Eprouvette(list_liquide)
                 p1.add_eprouvette(e)
 
-            if test[2]:
+            if test["eq"]:
                 self.assertTrue(p0 == p1)
+                self.assertTrue(p1 == p0)
                 self.assertFalse(p0 != p1)
+                self.assertFalse(p1 != p0)
+                self.assertTrue(p0.is_same_as(p1))
+                self.assertTrue(p1.is_same_as(p0))
             else:
                 self.assertFalse(p0 == p1)
+                self.assertFalse(p1 == p0)
                 self.assertTrue(p0 != p1)
+                self.assertTrue(p1 != p0)
+                if test["same"]:
+                    self.assertTrue(p0.is_same_as(p1))
+                    self.assertTrue(p1.is_same_as(p0))
+                else:
+                    self.assertFalse(p0.is_same_as(p1))
+                    self.assertFalse(p1.is_same_as(p0))
+
 
     def test_puzzle_clone(self):
         p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])])
