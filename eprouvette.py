@@ -33,6 +33,7 @@ class Eprouvette:
     def __init__(self, doses: Sequence, max_len=None):
         self._max_len = None
         self._doses = [dose for dose in doses if dose is not None]
+        self._len_doses = len(self._doses)  # speeding further computation
         if max_len is not None:
             self.max_len = max_len
 
@@ -60,18 +61,18 @@ class Eprouvette:
     @property
     def is_vide(self) -> bool:
         """@return True si l'éprouvette est vide."""
-        return len(self._doses) == 0
+        return self._len_doses == 0
 
     @property
     def is_pleine(self) -> bool:
         """@return True si l'éprouvette est pleine."""
         if self.max_len is None:
             return False
-        return len(self._doses) == self.max_len
+        return self._len_doses == self.max_len
 
     def __len__(self) -> int:
         """Implémente len() pour une éprouvette -> Nombre de doses dans l'éprouvette."""
-        return len(self._doses)
+        return self._len_doses
 
     @property
     def liquides(self) -> Set[Any]:
@@ -112,8 +113,9 @@ class Eprouvette:
             return False
         if len(self) != len(other):
             return False
-        for liquide1, liquide2 in zip(self, other):
-            if liquide1 != liquide2:
+        # + pythonique (mais non optimisé):  for liquide1, liquide2 in zip(self, other):
+        for i in range(self._len_doses):
+            if self[i] != other[i]:
                 return False
         return True
 
@@ -123,6 +125,7 @@ class Eprouvette:
             raise EprouvetteError(
                 "On ne peut pas retirer une dose d'une éprouvette vide"
             )
+        self._len_doses -= 1
         return self._doses.pop()
 
     def can_push_dose(self, liquide: Any) -> bool:
@@ -144,6 +147,7 @@ class Eprouvette:
             raise EprouvetteError(
                 f"Impossible d'ajouter du {liquide} dans l'éprouvette {self}"
             )
+        self._len_doses += 1
         self._doses.append(liquide)
 
     def is_possible_verser_une_dose_dans(self, destination: Eprouvette) -> bool:

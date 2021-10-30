@@ -56,13 +56,13 @@ class Puzzle:
                 return False
         return True
 
-    def is_same_as(self, other: object) -> bool:
+    def is_same_as(self, other: Puzzle) -> bool:
         """
         @return True si les 2 puzzles sont similaires
         (mêmes éprouvettes mais pas forcement dans le même ordre).
         @see __equ__ pour une stricte identité.
         """
-        if not isinstance(other, Puzzle) or len(self) != len(other):
+        if len(self) != len(other):
             return False
         # Table des éprouvettes identifiées idem dans other puzzle
         table: List[bool] = [False for _ in range(len(self))]

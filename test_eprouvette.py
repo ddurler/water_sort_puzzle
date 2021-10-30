@@ -59,6 +59,16 @@ class TestEprouvette(unittest.TestCase):
         e.max_len = 4
         self.assertEqual(e.max_len, 4)
 
+        # Et annuler cette définition
+        e.max_len = None
+        self.assertIsNone(e.max_len)
+
+    def test_eprouvette_is_pleine(self):
+        e = Eprouvette(["A", "B", "B", "C"], max_len=4)
+        self.assertTrue(e.is_pleine)
+        e.max_len = None
+        self.assertFalse(e.is_pleine)
+
     def test_eprouvette_pop(self):
         e = Eprouvette(["A", "B", "B", "C"])
 

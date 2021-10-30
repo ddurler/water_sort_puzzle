@@ -75,6 +75,11 @@ Ici, on verse (1) dans (2) :
   `coverage report -m` pour un résume de la couverture de code avec les numéros de lignes non couvertes
   'coverage html' pour générer un rapport dans ./htmpcov (ouvrir index.html)
 
+### cProfile
+
+ `python -m cProfile xyz.py` pour donner des statistiques sur le nombre d'appels de fonctions et la durée
+ d'exécution dans les différentes fonctions
+
 ### mypy
 
 [mypy](https://mypy.readthedocs.io/en/latest/index.html) est un outil statique pour vérifier les types d'un
