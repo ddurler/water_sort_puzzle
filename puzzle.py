@@ -21,6 +21,9 @@ class Puzzle:
     contenu des éprouvettes
     """
 
+    # Restreint les propriétés des instances pour gagner du temps et de la mémoire
+    __slots__ = "_eprouvettes"
+
     def __init__(self, epouvettes: List[Eprouvette] | None = None) -> None:
         self._eprouvettes: List[Eprouvette] = []
         if epouvettes:

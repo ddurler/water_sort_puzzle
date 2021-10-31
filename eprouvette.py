@@ -26,6 +26,9 @@ class Eprouvette:
             Ici on a 3 doses avec 2 liquides différents dans l'éprouvette
     """
 
+    # Restreint les propriétés des instances pour gagner du temps et de la mémoire
+    __slots__ = "doses", "nb_doses"
+
     MAX_DOSES = 4
 
     def __init__(self, doses: Sequence):
@@ -116,6 +119,20 @@ class Eprouvette:
         if destination.nb_doses == Eprouvette.MAX_DOSES:
             return False
         # Si les liquides sont les mêmes
+        return (
+            self.doses[self.nb_doses - 1] == destination.doses[destination.nb_doses - 1]
+        )
+
+    def is_interessant_verser_dans(self, destination: Eprouvette) -> bool:
+        """@return True si verser la source dans la destination est un mouvement possible et interressant à étudier."""
+        if destination.nb_doses == Eprouvette.MAX_DOSES:
+            return False
+        if self.nb_doses == 0:
+            return False  # Source vide
+        if destination.nb_doses == 0:
+            if self.nb_different_liquides == 1:
+                return False  # Car la situation est inchangée au final
+            return True
         return (
             self.doses[self.nb_doses - 1] == destination.doses[destination.nb_doses - 1]
         )

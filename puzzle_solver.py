@@ -6,6 +6,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from itertools import permutations
 import queue
+import time
+
 from typing import List
 
 from eprouvette import Eprouvette
@@ -55,10 +57,26 @@ class PuzzleSolver:
             raise ValueError(f"Puzzle inconsistant : {puzzle}")
         self.puzzle: Puzzle = puzzle.clone()
 
+    @staticmethod
+    def str_second(sec: float) -> str:
+        """Convertion d'une durée en secondes en une chaîne heure + minute + seconde."""
+        sec_value = int(sec) % (24 * 3600)
+        hour_value = sec_value // 3600
+        sec_value %= 3600
+        min_value = sec_value // 60
+        sec_value %= 60
+        if hour_value:
+            return f"{hour_value} h {min_value:02d} mn {sec_value:02d} s"
+        elif min_value:
+            return f"{min_value} mn {sec_value:02d} s"
+        else:
+            return f"{sec_value} secs"
+
     def solve(self, verbose=False) -> PuzzleChain | None:
         """Résout le puzzle."""
         # Liste des puzzles à examiner
         # On initialise cette liste avec le puzzle d'origine qui n'a pas de prédécesseur
+        time_start = time.time()
         self.puzzle_chains_todo: queue.SimpleQueue[PuzzleChain] = queue.SimpleQueue()
         self.puzzle_chains_todo.put(
             PuzzleChain(
@@ -70,13 +88,19 @@ class PuzzleSolver:
         nb_loops = 0
         while not self.puzzle_chains_todo.empty():
             nb_loops += 1
-            if verbose and nb_loops % 10 == 0:
-                nb_loops = 0
+            if verbose and nb_loops % 25 == 0:
+                current_time = time.time() - time_start
                 nb_done = len(self.puzzle_chains_done)
+                time_per_done: float = 0
+                if nb_done > 0:
+                    time_per_done = current_time / nb_done
                 nb_todo = self.puzzle_chains_todo.qsize()
+                time_todo = nb_todo * time_per_done
                 if nb_done + nb_todo > 0:
                     print(
-                        f"Solving todo={nb_todo}, done={nb_done}, {(100 *nb_done) / (nb_done + nb_todo):.1f}%..."
+                        f"Solving after {self.str_second(current_time)}: loops=#{nb_loops}, todo={nb_todo}, "
+                        f"done={nb_done}, ratio done/todo={(100 *nb_done) / (nb_done + nb_todo):.1f}%, "
+                        f"solution in {self.str_second(time_todo)}..."
                     )
             p = self.puzzle_chains_todo.get()
             if (ret := self._explore_puzzle_chain(p)) is not None:
@@ -99,14 +123,12 @@ class PuzzleSolver:
     def _generate_puzzle_chains_todo_from(
         self, puzzle_chain: PuzzleChain
     ) -> PuzzleChain | None:
-        """Ajoute tous les puzzles possibles depuis le puzzle de puzzle_chain dans la queue à traiter."""
+        """Ajoute tous les puzzles interessants depuis le puzzle de puzzle_chain dans la queue à traiter."""
         puzzle: Puzzle = puzzle_chain.puzzle
         for (i_source, i_destination) in permutations(range(len(puzzle)), 2):
             eprouvette_source: Eprouvette = puzzle[i_source]
             eprouvette_destination: Eprouvette = puzzle[i_destination]
-            if eprouvette_source.is_possible_verser_une_dose_dans(
-                eprouvette_destination
-            ):
+            if eprouvette_source.is_interessant_verser_dans(eprouvette_destination):
                 new_puzzle = puzzle.clone()
                 eprouvette_source = new_puzzle[i_source]
                 eprouvette_destination = new_puzzle[i_destination]
@@ -123,8 +145,6 @@ class PuzzleSolver:
 
 
 if __name__ == "__main__":
-
-    import time
 
     def solve_generic(puzzle: Puzzle, verbose=False):
         solver: PuzzleSolver = PuzzleSolver(puzzle)

@@ -93,52 +93,76 @@ class TestEprouvette(unittest.TestCase):
         self.assertTrue(e.is_pleine)
         self.assertRaises(EprouvetteError, e.push_dose, "A")
 
+    def test_epourvette_is_interessant_verser_dans(self):
+        tests = [
+            ["", "", False],
+            ["", "A", False],
+            ["A", "", False],  # False car le résultat est symétrique
+            ["A", "B", False],
+            ["A", "A", True],
+            ["A", "BA", True],
+            ["BA", "A", True],
+            ["AA", "", False],  # False car le résultat est symétrique
+            ["AA", "B", False],
+            ["AA", "AB", False],
+            ["AA", "BA", True],
+            ["AA", "A", True],
+            ["BAA", "A", True],
+            ["AA", "AA", True],
+        ]
+
+        for test in tests:
+            source = Eprouvette(test[0])
+            destination = Eprouvette(test[1])
+            if test[2]:
+                # self.assertTrue(m.is_mouvement_ok())
+                if not source.is_interessant_verser_dans(destination):
+                    print(f"FAIL True on: [{test[0]}] -> [{test[1]}]")
+            else:
+                # self.assertFalse(m.is_mouvement_ok())
+                if source.is_interessant_verser_dans(destination):
+                    print(f"FAIL False on: [{test[0]}] -> [{test[1]}]")
+
     def test_eprouvette_verser(self):
         tests = [
-            {"source": [], "destination": [], "possible": False},
-            {"source": ["A"], "destination": [], "possible": True, "nb_doses": 1},
-            {"source": ["A"], "destination": ["B"], "possible": False},
-            {"source": ["A"], "destination": ["A"], "possible": True, "nb_doses": 1},
+            {"source": "", "destination": "", "possible": False},
+            {"source": "A", "destination": "", "possible": True, "nb_doses": 1},
+            {"source": "A", "destination": "B", "possible": False},
+            {"source": "A", "destination": "A", "possible": True, "nb_doses": 1},
             {
-                "source": ["A", "A"],
-                "destination": ["A"],
+                "source": "AA",
+                "destination": "A",
                 "possible": True,
                 "nb_doses": 2,
             },
             {
-                "source": ["A", "A"],
-                "destination": ["A", "A"],
+                "source": "AA",
+                "destination": "AA",
                 "possible": True,
                 "nb_doses": 2,
             },
             {
-                "source": ["A", "A", "A"],
-                "destination": ["A", "A"],
+                "source": "AAA",
+                "destination": "A",
                 "possible": True,
-                "nb_doses": 2,
+                "nb_doses": 3,
             },
+            {"source": "A", "destination": "AAAA", "possible": False},
             {
-                "source": ["A", "A", "A"],
-                "destination": ["A", "A", "A"],
-                "possible": True,
-                "nb_doses": 1,
-            },
-            {"source": ["A"], "destination": ["A", "A", "A", "A"], "possible": False},
-            {
-                "source": ["B", "B", "A"],
-                "destination": ["A"],
+                "source": "BBA",
+                "destination": "A",
                 "possible": True,
                 "nb_doses": 1,
             },
             {
-                "source": ["B", "B", "A", "A"],
-                "destination": ["B", "A"],
+                "source": "BBAA",
+                "destination": "BA",
                 "possible": True,
                 "nb_doses": 2,
             },
             {
-                "source": ["B", "B", "A", "A"],
-                "destination": ["B", "B"],
+                "source": "BBAA",
+                "destination": "BB",
                 "possible": False,
             },
         ]
