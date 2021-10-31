@@ -165,6 +165,10 @@ if __name__ == "__main__":
             solve_generic((puzzle))
 
     def solve_puzzle2():
+        """
+        Puzzle #29 du jeu 'Water Sort Puzzle' sur Andoid OS
+        Voir 'solve_puzzle2 output.txt' pour le résultat'
+        """
         VERT = 0
         ROSE = 1
         JAUNE = 2
