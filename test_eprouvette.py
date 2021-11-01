@@ -100,7 +100,9 @@ class TestEprouvette(unittest.TestCase):
             ["A", "", False],  # False car le résultat est symétrique
             ["A", "B", False],
             ["A", "A", True],
+            ["A", "AAAA", False],  # False car destination pleine
             ["A", "BA", True],
+            ["BA", "", True],
             ["BA", "A", True],
             ["AA", "", False],  # False car le résultat est symétrique
             ["AA", "B", False],
@@ -111,17 +113,16 @@ class TestEprouvette(unittest.TestCase):
             ["AA", "AA", True],
         ]
 
+        # Ce test est prévu pour des éprouvettes contenant 4 doses
+        self.assertEqual(Eprouvette.MAX_DOSES, 4)
+
         for test in tests:
             source = Eprouvette(test[0])
             destination = Eprouvette(test[1])
             if test[2]:
-                # self.assertTrue(m.is_mouvement_ok())
-                if not source.is_interessant_verser_dans(destination):
-                    print(f"FAIL True on: [{test[0]}] -> [{test[1]}]")
+                self.assertTrue(source.is_interessant_verser_dans(destination))
             else:
-                # self.assertFalse(m.is_mouvement_ok())
-                if source.is_interessant_verser_dans(destination):
-                    print(f"FAIL False on: [{test[0]}] -> [{test[1]}]")
+                self.assertFalse(source.is_interessant_verser_dans(destination))
 
     def test_eprouvette_verser(self):
         tests = [
@@ -188,17 +189,17 @@ class TestEprouvette(unittest.TestCase):
 
     def test_eprouvette_is_same_as(self):
         tests = [
-            [[], [], True],
-            [[], ["A"], False],
-            [["A"], [], False],
-            [["A"], ["A"], True],
-            [["A"], ["A", "B"], False],
-            [["A"], ["B"], False],
-            [["A", "B", "C"], ["A"], False],
-            [["A", "B", "C"], ["A", "B"], False],
-            [["A", "B", "C"], ["A", "B", "B"], False],
-            [["A", "B", "C"], ["A", "B", "C"], True],
-            [["A", "B", "C"], ["A", "B", "C", "D"], False],
+            ["", "", True],
+            ["", "A", False],
+            ["A", "", False],
+            ["A", "A", True],
+            ["A", "AB", False],
+            ["A", "B", False],
+            ["ABC", "A", False],
+            ["ABC", "AB", False],
+            ["ABC", "ABB", False],
+            ["ABC", "ABC", True],
+            ["ABC", "ABCD", False],
         ]
 
         # Ce test est prévu des éprouvettes contenant 4 doses
