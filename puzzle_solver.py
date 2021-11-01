@@ -3,10 +3,10 @@
 # Import pour pouvoir faire du typing :PuzzleChain dans la classe PuzzleChain
 from __future__ import annotations
 
-from dataclasses import dataclass
 from itertools import permutations
 import queue
 import time
+import math
 
 from typing import List
 
@@ -14,16 +14,33 @@ from eprouvette import Eprouvette
 from puzzle import Puzzle
 
 
-@dataclass
 class PuzzleChain:
     """
     Un puzzle chain permet de chaîner les puzzles entre un previous_puzzle (précédent) qui peut
     se transformer en un puzzle
     """
 
-    previous_puzzle_chain: PuzzleChain | None
-    puzzle: Puzzle
-    message: str
+    __slots__ = "previous_puzzle_chain", "puzzle", "message", "nb_chains_sans_vide"
+
+    def __init__(
+        self, previous_puzzle_chain: PuzzleChain | None, puzzle: Puzzle, message: str
+    ) -> None:
+        """
+        PuzzleChain contenant le puzzle précédent ou None pour le 1e
+        Puzzle courant de la chaîne
+        Message indiquant la construction du puzzle courant depuis le précédent
+        """
+        self.previous_puzzle_chain = previous_puzzle_chain
+        self.puzzle = puzzle
+        self.message = message
+
+        # Nombre de PuzzleChain qui se suivent sans que le puzzle contienne au moins une éprouvetee vide
+        if previous_puzzle_chain is None:
+            self.nb_chains_sans_vide = 0
+        elif puzzle.contains_eprouvette_vide():
+            self.nb_chains_sans_vide = 0
+        else:
+            self.nb_chains_sans_vide = previous_puzzle_chain.nb_chains_sans_vide + 1
 
     def show_puzzle_chains(self) -> str:
         """Affiche la liste des puzzles chaînés."""
@@ -72,11 +89,31 @@ class PuzzleSolver:
         else:
             return f"{sec_value} secs"
 
-    def solve(self, verbose=False) -> PuzzleChain | None:
-        """Résout le puzzle."""
+    @staticmethod
+    def estimated_time(nb_todo: int, nb_done: int, time_done: float) -> float:
+        """
+        @return temps estimé pour calculer nb_todo sachant que le temps pour nb_done est time_done
+        On considère ici qu'on est dans un modèle exponentiel : t = math.exp(a * nb)
+        """
+        try:
+            a: float = math.log(time_done) / nb_done
+            total_time = math.exp(a * (nb_done + nb_todo))
+            return total_time - time_done
+        except (ValueError, OverflowError):
+            return 0
+
+    def solve(
+        self, nb_chains_sans_vide: int = 0, verbose_cycle: float = 0.0
+    ) -> PuzzleChain | None:
+        """
+        Résout le puzzle.
+        nb_chains_sans_vide : Si non nul, nombre max de mouvements consécutifs sans constater une éprouvette vide.
+        verbose_cycle : Si non nul, trace périodique (en secondes) de l'état d'avancement
+        """
         # Liste des puzzles à examiner
         # On initialise cette liste avec le puzzle d'origine qui n'a pas de prédécesseur
         time_start = time.time()
+        next_time_verbose: float = verbose_cycle
         self.puzzle_chains_todo: queue.SimpleQueue[PuzzleChain] = queue.SimpleQueue()
         self.puzzle_chains_todo.put(
             PuzzleChain(
@@ -85,24 +122,30 @@ class PuzzleSolver:
         )
         # Liste des puzzles déjà examinés (vide au début de la résolution)
         self.puzzle_chains_done: List[PuzzleChain] = []
-        nb_loops = 0
+        nb_loops: int = 0
+        nb_dropped_puzzles: int = 0
         while not self.puzzle_chains_todo.empty():
             nb_loops += 1
-            if verbose and nb_loops % 25 == 0:
-                current_time = time.time() - time_start
+            current_time = time.time() - time_start
+            if verbose_cycle and current_time > next_time_verbose:
+                next_time_verbose += verbose_cycle
                 nb_done = len(self.puzzle_chains_done)
                 time_per_done: float = 0
                 if nb_done > 0:
                     time_per_done = current_time / nb_done
                 nb_todo = self.puzzle_chains_todo.qsize()
-                time_todo = nb_todo * time_per_done
+                time_todo = self.estimated_time(nb_todo, nb_done, current_time)
                 if nb_done + nb_todo > 0:
                     print(
                         f"Solving after {self.str_second(current_time)}: loops=#{nb_loops}, todo={nb_todo}, "
                         f"done={nb_done}, ratio done/todo={(100 *nb_done) / (nb_done + nb_todo):.1f}%, "
+                        f"dropped={nb_dropped_puzzles}, "
                         f"solution in {self.str_second(time_todo)}..."
                     )
             p = self.puzzle_chains_todo.get()
+            if nb_chains_sans_vide and p.nb_chains_sans_vide >= nb_chains_sans_vide:
+                nb_dropped_puzzles += 1
+                continue
             if (ret := self._explore_puzzle_chain(p)) is not None:
                 return ret  # Solution found
         return None  # No solution
@@ -146,11 +189,15 @@ class PuzzleSolver:
 
 if __name__ == "__main__":
 
-    def solve_generic(puzzle: Puzzle, verbose=False):
+    def solve_generic(
+        puzzle: Puzzle, nb_chains_sans_vide: int = 0, verbose_cycle: float = 0
+    ) -> None:
         solver: PuzzleSolver = PuzzleSolver(puzzle)
 
         time_start = time.time()
-        solution: PuzzleChain | None = solver.solve(verbose=verbose)
+        solution: PuzzleChain | None = solver.solve(
+            nb_chains_sans_vide=nb_chains_sans_vide, verbose_cycle=verbose_cycle
+        )
         time_solving = time.time() - time_start
 
         if solution:
@@ -159,7 +206,7 @@ if __name__ == "__main__":
         else:
             print(f"Non résolu : {puzzle}\n")
 
-    def solve_puzzle1():
+    def solve_puzzle0() -> None:
         """
         Ici, chaque puzzle est représenté par une séquence de chaînes de caractères.
         Chaque lettre d'une chaîne de caractère représente une dose d'un liquide identifié par la lettre.
@@ -182,9 +229,9 @@ if __name__ == "__main__":
             for str_eprouvette in str_puzzle:
                 eprouvette: Eprouvette = Eprouvette(str_eprouvette)
                 puzzle.add_eprouvette(eprouvette)
-            solve_generic((puzzle))
+            solve_generic(puzzle)
 
-    def solve_puzzle2():
+    def solve_puzzle29() -> None:
         """
         Puzzle #29 du jeu 'Water Sort Puzzle' sur Andoid OS
         Voir 'solve_puzzle2 output.txt' pour le résultat'
@@ -215,9 +262,10 @@ if __name__ == "__main__":
                     Eprouvette([]),
                 ]
             ),
-            verbose=True,
+            nb_chains_sans_vide=8,
+            verbose_cycle=10,
         )
 
     # Main
-    solve_puzzle1()
-    solve_puzzle2()
+    # solve_puzzle0()
+    solve_puzzle29()

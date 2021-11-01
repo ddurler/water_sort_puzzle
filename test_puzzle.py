@@ -126,6 +126,17 @@ class TestPuzzle(unittest.TestCase):
 
             self.assertEqual(p.is_done, test[1])
 
+    def test_puzzle_contains_eprouvette_vide(self):
+
+        p = Puzzle()
+        self.assertFalse(p.contains_eprouvette_vide())
+
+        p.add_eprouvette(Eprouvette("ABC"))
+        self.assertFalse(p.contains_eprouvette_vide())
+
+        p.add_eprouvette(Eprouvette(""))
+        self.assertTrue(p.contains_eprouvette_vide())
+
 
 if __name__ == "__main__":
 

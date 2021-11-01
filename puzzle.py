@@ -129,6 +129,12 @@ class Puzzle:
 
         return Puzzle(copy_list_eprouvettes)
 
+    def contains_eprouvette_vide(self) -> bool:
+        for eprouvette in self.iter_eprouvettes():
+            if eprouvette.is_vide:
+                return True
+        return False
+
     def __repr__(self):
         ret = ""
         for n, eprouvette in enumerate(self.iter_eprouvettes()):
