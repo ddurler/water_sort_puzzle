@@ -99,7 +99,7 @@ class PuzzleSolver:
             a: float = math.log(time_done) / nb_done
             total_time = math.exp(a * (nb_done + nb_todo))
             return total_time - time_done
-        except (ValueError, OverflowError):
+        except (ValueError, ZeroDivisionError, OverflowError):
             return 0
 
     def solve(
@@ -231,41 +231,70 @@ if __name__ == "__main__":
                 puzzle.add_eprouvette(eprouvette)
             solve_generic(puzzle)
 
+    # Couleurs des puzzles
+    VERT = 0
+    ROSE = 1
+    JAUNE = 2
+    BLEU_FONCE = 3
+    GRIS = 4
+    BLEU_CLAIR = 5
+    ROUGE = 6
+    ORANGE = 7
+    VIOLET = 8
+
     def solve_puzzle29() -> None:
         """
         Puzzle #29 du jeu 'Water Sort Puzzle' sur Andoid OS
         Voir 'solve_puzzle2 output.txt' pour le résultat'
         """
-        VERT = 0
-        ROSE = 1
-        JAUNE = 2
-        GRIS_FONCE = 4
-        GRIS = 5
-        BLEU_CLAIR = 6
-        ROUGE = 7
-        ORANGE = 8
-        VIOLET = 9
 
         solve_generic(
             Puzzle(
                 [
-                    Eprouvette([VERT, ROSE, JAUNE, GRIS_FONCE]),
+                    Eprouvette([VERT, ROSE, JAUNE, BLEU_FONCE]),
                     Eprouvette([GRIS, JAUNE, BLEU_CLAIR, BLEU_CLAIR]),
                     Eprouvette([GRIS, ROUGE, GRIS, ROUGE]),
-                    Eprouvette([VERT, GRIS_FONCE, ORANGE, VERT]),
+                    Eprouvette([VERT, BLEU_FONCE, ORANGE, VERT]),
                     Eprouvette([ORANGE, ROSE, ROSE, ORANGE]),
                     Eprouvette([JAUNE, VIOLET, GRIS, VIOLET]),
                     Eprouvette([BLEU_CLAIR, ROSE, VIOLET, JAUNE]),
-                    Eprouvette([BLEU_CLAIR, VIOLET, ORANGE, GRIS_FONCE]),
-                    Eprouvette([GRIS_FONCE, ROUGE, VERT, ROUGE]),
+                    Eprouvette([BLEU_CLAIR, VIOLET, ORANGE, BLEU_FONCE]),
+                    Eprouvette([BLEU_FONCE, ROUGE, VERT, ROUGE]),
                     Eprouvette([]),
                     Eprouvette([]),
                 ]
             ),
-            nb_chains_sans_vide=8,
+            nb_chains_sans_vide=4,
             verbose_cycle=10,
         )
 
-    # Main
+    def solve_puzzle37() -> None:
+        """
+        Puzzle #37 du jeu 'Water Sort Puzzle' sur Andoid OS
+        Voir 'solve_puzzle2 output.txt' pour le résultat'
+        """
+
+        solve_generic(
+            Puzzle(
+                [
+                    Eprouvette([ROSE, BLEU_CLAIR, ROUGE, ORANGE]),
+                    Eprouvette([VIOLET, VERT, GRIS, BLEU_FONCE]),
+                    Eprouvette([ORANGE, GRIS, ROUGE, VIOLET]),
+                    Eprouvette([BLEU_FONCE, BLEU_CLAIR, BLEU_CLAIR, ROUGE]),
+                    Eprouvette([ROSE, BLEU_CLAIR, VERT, ROSE]),
+                    Eprouvette([VIOLET, JAUNE, VERT, VERT]),
+                    Eprouvette([BLEU_FONCE, ORANGE, JAUNE, GRIS]),
+                    Eprouvette([JAUNE, ROSE, ORANGE, VIOLET]),
+                    Eprouvette([GRIS, JAUNE, BLEU_FONCE, ROUGE]),
+                    Eprouvette([]),
+                    Eprouvette([]),
+                ]
+            ),
+            nb_chains_sans_vide=5,
+            verbose_cycle=10,
+        )
+
+    # Résolution des puzzles
     # solve_puzzle0()
     solve_puzzle29()
+    # solve_puzzle37()
