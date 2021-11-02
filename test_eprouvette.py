@@ -70,7 +70,8 @@ class TestEprouvette(unittest.TestCase):
         self.assertEqual(e.top_liquide, None)
         self.assertTrue(e.is_vide)
 
-        self.assertRaises(EprouvetteError, e.pop_dose)
+        with self.assertRaises(EprouvetteError):
+            e.pop_dose()
 
     def test_eprouvette_push(self):
         e = Eprouvette(["A"])
@@ -82,16 +83,19 @@ class TestEprouvette(unittest.TestCase):
         self.assertEqual(e.top_liquide, "A")
 
         self.assertFalse(e.can_push_dose("B"))
-        self.assertRaises(EprouvetteError, e.push_dose, "B")
+        with self.assertRaises(EprouvetteError):
+            e.push_dose("B")
 
         self.assertFalse(e.can_push_dose(None))
-        self.assertRaises(EprouvetteError, e.push_dose, None)
+        with self.assertRaises(EprouvetteError):
+            e.push_dose(None)
 
     def test_eprouvette_push_overflow(self):
         list_liquides = ["A" for _ in range(Eprouvette.MAX_DOSES)]
         e = Eprouvette(list_liquides)
         self.assertTrue(e.is_pleine)
-        self.assertRaises(EprouvetteError, e.push_dose, "A")
+        with self.assertRaises(EprouvetteError):
+            e.push_dose("A")
 
     def test_epourvette_is_interessant_verser_dans(self):
         tests = [
