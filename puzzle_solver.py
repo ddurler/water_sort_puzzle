@@ -130,9 +130,6 @@ class PuzzleSolver:
             if verbose_cycle and current_time > next_time_verbose:
                 next_time_verbose += verbose_cycle
                 nb_done = len(self.puzzle_chains_done)
-                time_per_done: float = 0
-                if nb_done > 0:
-                    time_per_done = current_time / nb_done
                 nb_todo = self.puzzle_chains_todo.qsize()
                 time_todo = self.estimated_time(nb_todo, nb_done, current_time)
                 if nb_done + nb_todo > 0:
