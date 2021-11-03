@@ -1,143 +1,159 @@
 #: coding:utf-8
 
-import unittest
+import pytest
 
 from eprouvette import Eprouvette
 from puzzle import Puzzle
 
 
-class TestPuzzle(unittest.TestCase):
-    def test_puzzle(self):
-        p = Puzzle([Eprouvette(["R", "R"]), Eprouvette(["R"])])
-        p.add_eprouvette(Eprouvette(["R"]))
+def test_puzzle():
+    p = Puzzle([Eprouvette(["R", "R"]), Eprouvette(["R"])])
+    p.add_eprouvette(Eprouvette(["R"]))
 
-    def test_puzzle_len(self):
-        p = Puzzle()
-        self.assertEqual(len(p), 0)
-        p.add_eprouvette(Eprouvette(["R"]))
-        self.assertEqual(len(p), 1)
 
-    def test_puzzle_items(self):
-        e_0 = Eprouvette(["A"])
-        e_1 = Eprouvette(["B"])
-        e_2 = Eprouvette(["C"])
-        p = Puzzle([e_0, e_1, e_2])
-        self.assertEqual(p[0], e_0)
-        self.assertEqual(p[1], e_1)
-        self.assertEqual(p[2], e_2)
+def test_puzzle_len():
+    p = Puzzle()
+    assert len(p) == 0
+    p.add_eprouvette(Eprouvette(["R"]))
+    assert len(p) == 1
 
-    def test_puzzle_repr(self):
-        p = Puzzle([Eprouvette(["A", "B"]), Eprouvette(["C"])])
-        puzzle_repr = f"{p}"
-        self.assertIn("A", puzzle_repr)
-        self.assertIn("B", puzzle_repr)
-        self.assertIn("C", puzzle_repr)
 
-    def test_puzzle_is_same_as(self):
-        tests = [
-            {"p0": [""], "p1": [""], "same": True},
-            {"p0": [""], "p1": ["A"], "same": False},
-            {"p0": ["A"], "p1": [""], "same": False},
-            {"p0": ["A"], "p1": ["A"], "same": True},
-            {"p0": ["A"], "p1": ["B"], "same": False},
-            {"p0": ["A"], "p1": ["AB", "C"], "same": False},
-            {"p0": ["AB"], "p1": ["B"], "same": False},
-            {"p0": ["AB", "B"], "p1": ["AB", "B"], "same": True},
-            {"p0": ["AB", "B"], "p1": ["B", "AB"], "same": True},
-            {"p0": ["", "AB", "B"], "p1": ["B", "", "AB"], "same": True},
-        ]
+def test_puzzle_items():
+    e_0 = Eprouvette(["A"])
+    e_1 = Eprouvette(["B"])
+    e_2 = Eprouvette(["C"])
+    p = Puzzle([e_0, e_1, e_2])
+    assert p[0] == e_0
+    assert p[1] == e_1
+    assert p[2] == e_2
 
-        self.assertFalse(Puzzle().is_same_as("Objet_qui_n_est_pas_un_puzzle"))
 
-        for test in tests:
-            p0 = Puzzle()
-            for list_liquide in test["p0"]:
-                e = Eprouvette(list_liquide)
-                p0.add_eprouvette(e)
+def test_puzzle_repr():
+    p = Puzzle([Eprouvette(["A", "B"]), Eprouvette(["C"])])
+    puzzle_repr = f"{p}"
+    assert "A" in puzzle_repr
+    assert "B" in puzzle_repr
+    assert "C" in puzzle_repr
 
-            p1 = Puzzle()
-            for list_liquide in test["p1"]:
-                e = Eprouvette(list_liquide)
-                p1.add_eprouvette(e)
 
-            if test["same"]:
-                self.assertTrue(p0.is_same_as(p1))
-                self.assertTrue(p1.is_same_as(p0))
-            else:
-                self.assertFalse(p0.is_same_as(p1))
-                self.assertFalse(p1.is_same_as(p0))
+@pytest.mark.parametrize(
+    "contenu0, contenu1, same",
+    [
+        ([""], [""], True),
+        ([""], ["A"], False),
+        (["A"], [""], False),
+        (["A"], ["A"], True),
+        (["A"], ["B"], False),
+        (["A"], ["AB", "C"], False),
+        (["AB"], ["B"], False),
+        (["AB", "B"], ["AB", "B"], True),
+        (["AB", "B"], ["B", "AB"], True),
+        (["", "AB", "B"], ["B", "", "AB"], True),
+    ],
+)
+def test_puzzle_is_same_as(contenu0, contenu1, same):
 
-    def test_puzzle_clone(self):
-        p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])])
-        p2 = p.clone()
-        self.assertTrue(p.is_same_as(p2))
+    assert not Puzzle().is_same_as("Objet_qui_n_est_pas_un_puzzle")
 
-    def test_puzzle_permutations(self):
-        e_a = Eprouvette(["A"])
-        e_b = Eprouvette(["B"])
-        e_c = Eprouvette(["C"])
-        p = Puzzle([e_a, e_b, e_c])
-        permutations = [perm for perm in p.iter_permutations()]
-        self.assertEqual(len(permutations), 6)
-        self.assertIn((e_a, e_b), permutations)
-        self.assertIn((e_a, e_c), permutations)
-        self.assertIn((e_b, e_a), permutations)
-        self.assertIn((e_b, e_c), permutations)
-        self.assertIn((e_c, e_a), permutations)
-        self.assertIn((e_c, e_b), permutations)
+    p0 = Puzzle()
+    for list_liquide in contenu0:
+        e = Eprouvette(list_liquide)
+        p0.add_eprouvette(e)
 
-    def test_puzzle_is_consistant_nb_doses_liquide(self):
-        p = Puzzle()
-        for nb_doses in range(Eprouvette.MAX_DOSES):
-            p.add_eprouvette(Eprouvette(["A"]))
-            if nb_doses == Eprouvette.MAX_DOSES - 1:
-                self.assertTrue(p.is_consistant)
-            else:
-                self.assertFalse(p.is_consistant)
+    p1 = Puzzle()
+    for list_liquide in contenu1:
+        e = Eprouvette(list_liquide)
+        p1.add_eprouvette(e)
 
-    def test_puzzle_is_consistant_nb_doses_vides(self):
-        list_liquides = ["A" for _ in range(Eprouvette.MAX_DOSES)]
-        e = Eprouvette(list_liquides)
-        p = Puzzle([e])
-        self.assertFalse(p.is_consistant)
+    if same:
+        assert p0.is_same_as(p1)
+        assert p1.is_same_as(p0)
+    else:
+        assert not p0.is_same_as(p1)
+        assert not p1.is_same_as(p0)
 
-    def test_puzzle_is_done(self):
-        tests = [
-            [[""], True],
-            [["A"], False],
-            [["AA"], False],
-            [["AAA"], False],
-            [["AAAA"], True],
-            [["AABB"], False],
-            [["AAAA", ""], True],
-            [["AAAA", "AABB"], False],
-            [["AAAA", "AABB"], False],
-            [["AAAA", "BBBB", ""], True],
-        ]
 
-        # Ce test est prévu pour des éprouvettes de 4 doses
-        self.assertEqual(Eprouvette.MAX_DOSES, 4)
+def test_puzzle_clone():
+    p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])])
+    p2 = p.clone()
+    assert p.is_same_as(p2)
 
-        for test in tests:
-            p = Puzzle()
-            for list_strings in test[0]:
-                e = Eprouvette(list_strings)
-                p.add_eprouvette(e)
 
-            self.assertEqual(p.is_done, test[1])
+def test_puzzle_permutations():
+    e_a = Eprouvette(["A"])
+    e_b = Eprouvette(["B"])
+    e_c = Eprouvette(["C"])
+    p = Puzzle([e_a, e_b, e_c])
+    permutations = [perm for perm in p.iter_permutations()]
+    assert len(permutations) == 6
+    assert (e_a, e_b) in permutations
+    assert (e_a, e_c) in permutations
+    assert (e_b, e_a) in permutations
+    assert (e_b, e_c) in permutations
+    assert (e_c, e_a) in permutations
+    assert (e_c, e_b) in permutations
 
-    def test_puzzle_contains_eprouvette_vide(self):
 
-        p = Puzzle()
-        self.assertFalse(p.contains_eprouvette_vide())
+def test_puzzle_is_consistant_nb_doses_liquide():
+    p = Puzzle()
+    for nb_doses in range(Eprouvette.MAX_DOSES):
+        p.add_eprouvette(Eprouvette(["A"]))
+        if nb_doses == Eprouvette.MAX_DOSES - 1:
+            assert p.is_consistant
+        else:
+            assert not p.is_consistant
 
-        p.add_eprouvette(Eprouvette("ABC"))
-        self.assertFalse(p.contains_eprouvette_vide())
 
-        p.add_eprouvette(Eprouvette(""))
-        self.assertTrue(p.contains_eprouvette_vide())
+def test_puzzle_is_consistant_nb_doses_vides():
+    list_liquides = ["A" for _ in range(Eprouvette.MAX_DOSES)]
+    e = Eprouvette(list_liquides)
+    p = Puzzle([e])
+    assert not p.is_consistant
+
+
+@pytest.mark.parametrize(
+    "contenu, done",
+    [
+        ([""], True),
+        (["A"], False),
+        (["AA"], False),
+        (["AAA"], False),
+        (["AAAA"], True),
+        (["AABB"], False),
+        (["AAAA", ""], True),
+        (["AAAA", "AABB"], False),
+        (["AAAA", "AABB"], False),
+        (["AAAA", "BBBB", ""], True),
+    ],
+)
+def test_puzzle_is_done(contenu, done):
+
+    # Ce test est prévu pour des éprouvettes de 4 doses
+    assert Eprouvette.MAX_DOSES == 4
+
+    p = Puzzle()
+    for list_strings in contenu:
+        e = Eprouvette(list_strings)
+        p.add_eprouvette(e)
+
+    if done:
+        assert p.is_done
+    else:
+        assert not p.is_done
+
+
+def test_puzzle_contains_eprouvette_vide():
+
+    p = Puzzle()
+    assert not p.contains_eprouvette_vide()
+
+    p.add_eprouvette(Eprouvette("ABC"))
+    assert not p.contains_eprouvette_vide()
+
+    p.add_eprouvette(Eprouvette(""))
+    assert p.contains_eprouvette_vide()
 
 
 if __name__ == "__main__":
 
-    unittest.main()
+    pytest.main()
