@@ -4,11 +4,9 @@
 from __future__ import annotations
 
 from itertools import permutations
-import queue
+import collections
 import time
 import math
-
-from typing import List
 
 from eprouvette import Eprouvette
 from puzzle import Puzzle
@@ -45,19 +43,21 @@ class PuzzleChain:
     def show_puzzle_chains(self) -> str:
         """Affiche la liste des puzzles chaînés."""
 
-        # Reconstitue la liste des puzzles (queue)
-        q: queue.LifoQueue = queue.LifoQueue()
-        q.put(self)
+        # Reconstitue la liste des puzzles
+        q: collections.deque[PuzzleChain] = collections.deque()
+        q.append(self)
         previous = self.previous_puzzle_chain
         while previous is not None:
-            q.put(previous)
+            q.append(previous)
             previous = previous.previous_puzzle_chain
 
         # Reconstitue les étapes de résolution
         ret = ""
-        while not q.empty():
-            puzzle_chain: PuzzleChain = q.get()
-            ret += f"{puzzle_chain.message}:\n  {puzzle_chain.puzzle}\n"
+        step = 1
+        while len(q):
+            puzzle_chain: PuzzleChain = q.pop()
+            ret += f"Step#{step}: {puzzle_chain.message}:\n  {puzzle_chain.puzzle}\n"
+            step += 1
         return ret
 
 
@@ -115,26 +115,26 @@ class PuzzleSolver:
 
         # Liste des puzzles à examiner
         # On initialise cette liste avec le puzzle d'origine qui n'a pas de prédécesseur
-        self.puzzle_chains_todo: queue.SimpleQueue[PuzzleChain] = queue.SimpleQueue()
-        self.puzzle_chains_todo.put(
+        self.puzzle_chains_todo: collections.deque[PuzzleChain] = collections.deque()
+        self.puzzle_chains_todo.append(
             PuzzleChain(
                 previous_puzzle_chain=None, puzzle=self.puzzle, message="Puzzle initial"
             )
         )
 
         # Liste des puzzles déjà examinés (vide au début de la résolution)
-        self.puzzle_chains_done: List[PuzzleChain] = []
+        self.puzzle_chains_done: collections.deque[PuzzleChain] = collections.deque()
 
         # Examination loop
         nb_loops: int = 0
         nb_dropped_puzzles: int = 0
-        while not self.puzzle_chains_todo.empty():
+        while len(self.puzzle_chains_todo):
             nb_loops += 1
             current_time = time.time() - time_start
             if verbose_cycle and current_time > next_time_verbose:
                 next_time_verbose += verbose_cycle
                 nb_done = len(self.puzzle_chains_done)
-                nb_todo = self.puzzle_chains_todo.qsize()
+                nb_todo = len(self.puzzle_chains_todo)
                 time_todo = self.estimated_time(nb_todo, nb_done, current_time)
                 if nb_done + nb_todo > 0:
                     print(
@@ -143,7 +143,7 @@ class PuzzleSolver:
                         f"dropped={nb_dropped_puzzles}, "
                         f"solution in {self.str_second(time_todo)}..."
                     )
-            p = self.puzzle_chains_todo.get()
+            p = self.puzzle_chains_todo.pop()
             if nb_chains_sans_vide and p.nb_chains_sans_vide >= nb_chains_sans_vide:
                 nb_dropped_puzzles += 1
                 continue
@@ -182,13 +182,14 @@ class PuzzleSolver:
                     puzzle=new_puzzle,
                     message=f"Verser #{i_source + 1} dans #{i_destination + 1}",
                 )
-                self.puzzle_chains_todo.put(new_puzzle_chain)
+                self.puzzle_chains_todo.append(new_puzzle_chain)
                 if new_puzzle.is_done:
                     return new_puzzle_chain
         return None
 
 
-if __name__ == "__main__":
+def main():
+    """Resolution de puzzles pour test/validation."""
 
     def solve_generic(
         puzzle: Puzzle, nb_chains_sans_vide: int = 0, verbose_cycle: float = 0
@@ -291,11 +292,16 @@ if __name__ == "__main__":
                     Eprouvette([]),
                 ]
             ),
-            nb_chains_sans_vide=5,
+            nb_chains_sans_vide=4,
             verbose_cycle=10,
         )
 
     # Résolution des puzzles
-    # solve_puzzle0()
+    solve_puzzle0()
     solve_puzzle29()
-    # solve_puzzle37()
+    solve_puzzle37()
+
+
+if __name__ == "__main__":
+
+    main()
