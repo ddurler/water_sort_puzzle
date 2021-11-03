@@ -4,7 +4,9 @@
 contenu.
 
 Au début du jeu, on a X éprouvettes contenant chacune jusqu'à Y doses de liquides différents.
-Ici, Y = constante (= 4) définie dans la classe 'Eprouvette'
+Ici, Y = constante (= 4) définie dans la classe `Eprouvette`.
+
+L'ensemble constitue un `puzzle` à résoudre :
 
 On ne peut verser une éprouvette dans l'autre que si :
 1 - Il y a au moins une dose de liquide dans l'éprouvette d'origine
@@ -59,6 +61,86 @@ Ici, on verse (1) dans (2) :
 
  Et c'est terminé...
 
+## puzzle_solver
+
+La classe `puzzle_solver` permet de résoudre les `puzzle`:
+
+```
+  solver: PuzzleSolver = PuzzleSolver(puzzle)
+
+  solution: PuzzleChain | None = solver.solve(
+      nb_chains_sans_vide=nb_chains_sans_vide, verbose_cycle=verbose_cycle
+  )
+
+  if solution:
+      print(solution.show_puzzle_chains())
+  else:
+      print(f"Non résolu : {puzzle}\n") 
+```
+
+Paramètres de la méthode **solve** :
+
+* **nb_chains_sans_vide** : Si non nul, défini un nombre maximum de mouvements avant d'observer au moins une
+  éprouvette vide dans le le puzzle. En activant ce paramètre, on obtient une solution non optimale mais
+  plus proche d'une séquence qu'un humain pourrait découvrir
+
+* **verbose_cycle** : Si non num, défini une période en seconde pour que l'algorithme de recherche donne
+  des indications sur son avancement
+
+
+## puzzle
+
+Les `puzzle` sont des collections d'`eprouvette`.
+
+```
+    VERT = 0
+    ROSE = 1
+    JAUNE = 2
+    BLEU_FONCE = 3
+    GRIS = 4
+    BLEU_CLAIR = 5
+    ROUGE = 6
+    ORANGE = 7
+    VIOLET = 8
+
+    puzzle: Puzzle = Puzzle(
+    [
+        Eprouvette([VERT, ROSE, JAUNE, BLEU_FONCE]),
+        Eprouvette([GRIS, JAUNE, BLEU_CLAIR, BLEU_CLAIR]),
+        Eprouvette([GRIS, ROUGE, GRIS, ROUGE]),
+        Eprouvette([VERT, BLEU_FONCE, ORANGE, VERT]),
+        Eprouvette([ORANGE, ROSE, ROSE, ORANGE]),
+        Eprouvette([JAUNE, VIOLET, GRIS, VIOLET]),
+        Eprouvette([BLEU_CLAIR, ROSE, VIOLET, JAUNE]),
+        Eprouvette([BLEU_CLAIR, VIOLET, ORANGE, BLEU_FONCE]),
+        Eprouvette([BLEU_FONCE, ROUGE, VERT, ROUGE]),
+        Eprouvette([]),
+        Eprouvette([]),
+    ]
+),
+```
+
+Un puzzle est valide pour être résolu s'il contient au moins une éprouvette vide et que le nombre de
+doses des différentes couleurs est un multiple de la taille d'une éprouvette (4 doses).
+
+## Eprouvette
+
+La classe `eprouvette` permet de créer et de résoudre les `puzzle`. Une `eprouvette` contient des 'doses' de
+'liquide'.
+Par défaut, il y a 4 doses maximum par éprouvette.
+Un liquide peut être n'importe quel objet python qui support l'opération __eq__ pour être comparée aux autres.
+
+Quand elle est construire, les liquides sont donnés 'de bas en haut':
+
+`eprouvette: Eprouvette = Eprouvette("AABC")`
+
+équivaut à l'éprouvette :
+
+    | C |
+    | B |
+    | A |
+    | A |
+    -----
 
 ## Rappels
 
@@ -66,11 +148,15 @@ Ici, on verse (1) dans (2) :
 
 #### Unittest
   Python `unittest` est installé de base avec python.
+  [Voir ici](https://docs.python.org/3/library/unittest.html)
 
   `python -m unittest` pour dérouler tous les tests unitaires
 
+  **note** Les tests de ce module ont migrés en `pytest`.
+
 #### Pytest
-  `pytest` est un package à installer mais il est de + en + utilisé en remplacement de `unittest`
+  [`pytest`](https://docs.pytest.org/) est un package à installer mais il est de + en +
+  utilisé en remplacement de `unittest`.
   En outre, `pytest` exécute parfaitement des des tests prévus pour `unittest`.
 
   `pip install -U pytest` pour l'installation
@@ -78,7 +164,8 @@ Ici, on verse (1) dans (2) :
   `pytest` pour dérouler les tests unitaires
 
   `pytest` déroule des différents tests en parallèle.
-  `pytest` est plus élaboré pour l'écriture des fichiers de tests unitaires (paramétrages, par exemple)
+  `pytest` est plus simple pour l'écriture de tests unitaires (paramétrages, par exemple)
+
 
 ### VSCode
 

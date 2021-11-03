@@ -5,7 +5,7 @@ import pytest
 from eprouvette import Eprouvette, EprouvetteError
 
 
-def test_epouvette_RR():
+def test_epouvette_rr():
     e = Eprouvette(["R", "R"])
     assert e.nb_different_liquides == 1
     assert e.liquides == {"R"}

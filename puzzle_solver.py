@@ -188,25 +188,28 @@ class PuzzleSolver:
         return None
 
 
+def solve_generic(
+    puzzle: Puzzle, nb_chains_sans_vide: int = 0, verbose_cycle: float = 0
+) -> None:
+    """Fonction générique pour résoudre un puzzle et afficher le résultat."""
+
+    solver: PuzzleSolver = PuzzleSolver(puzzle)
+
+    time_start = time.time()
+    solution: PuzzleChain | None = solver.solve(
+        nb_chains_sans_vide=nb_chains_sans_vide, verbose_cycle=verbose_cycle
+    )
+    time_solving = time.time() - time_start
+
+    if solution:
+        print(f"Solution (en {time_solving:.3f} secs) :")
+        print(solution.show_puzzle_chains())
+    else:
+        print(f"Non résolu : {puzzle}\n")
+
+
 def main():
     """Resolution de puzzles pour test/validation."""
-
-    def solve_generic(
-        puzzle: Puzzle, nb_chains_sans_vide: int = 0, verbose_cycle: float = 0
-    ) -> None:
-        solver: PuzzleSolver = PuzzleSolver(puzzle)
-
-        time_start = time.time()
-        solution: PuzzleChain | None = solver.solve(
-            nb_chains_sans_vide=nb_chains_sans_vide, verbose_cycle=verbose_cycle
-        )
-        time_solving = time.time() - time_start
-
-        if solution:
-            print(f"Solution (en {time_solving:.3f} secs) :")
-            print(solution.show_puzzle_chains())
-        else:
-            print(f"Non résolu : {puzzle}\n")
 
     def solve_puzzle0() -> None:
         """
@@ -247,7 +250,7 @@ def main():
     def solve_puzzle29() -> None:
         """
         Puzzle #29 du jeu 'Water Sort Puzzle' sur Andoid OS
-        Voir 'solve_puzzle2 output.txt' pour le résultat'
+        Voir 'solve_puzzle29 output.txt' pour le résultat'
         """
 
         solve_generic(
@@ -273,7 +276,7 @@ def main():
     def solve_puzzle37() -> None:
         """
         Puzzle #37 du jeu 'Water Sort Puzzle' sur Andoid OS
-        Voir 'solve_puzzle2 output.txt' pour le résultat'
+        Voir 'solve_puzzle37 output.txt' pour le résultat'
         """
 
         solve_generic(
