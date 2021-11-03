@@ -110,18 +110,22 @@ class PuzzleSolver:
         nb_chains_sans_vide : Si non nul, nombre max de mouvements consécutifs sans constater une éprouvette vide.
         verbose_cycle : Si non nul, trace périodique (en secondes) de l'état d'avancement
         """
-        # Liste des puzzles à examiner
-        # On initialise cette liste avec le puzzle d'origine qui n'a pas de prédécesseur
         time_start = time.time()
         next_time_verbose: float = verbose_cycle
+
+        # Liste des puzzles à examiner
+        # On initialise cette liste avec le puzzle d'origine qui n'a pas de prédécesseur
         self.puzzle_chains_todo: queue.SimpleQueue[PuzzleChain] = queue.SimpleQueue()
         self.puzzle_chains_todo.put(
             PuzzleChain(
                 previous_puzzle_chain=None, puzzle=self.puzzle, message="Puzzle initial"
             )
         )
+
         # Liste des puzzles déjà examinés (vide au début de la résolution)
         self.puzzle_chains_done: List[PuzzleChain] = []
+
+        # Examination loop
         nb_loops: int = 0
         nb_dropped_puzzles: int = 0
         while not self.puzzle_chains_todo.empty():
