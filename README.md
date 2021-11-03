@@ -80,6 +80,13 @@ Ici, on verse (1) dans (2) :
   `pytest` déroule des différents tests en parallèle.
   `pytest` est plus élaboré pour l'écriture des fichiers de tests unitaires (paramétrages, par exemple)
 
+### VSCode
+
+  CVCode propose un onglet `TEST` dédié pour la réalisation et le suivi des tests unitaires.
+
+  Lors de la première utilisation, VSCode propose les menus pour configurer automatiquement les tests unitaires.
+  Cette configuration est faite dans `.vscode\settings.json`
+
 ### Coverage
 
   `pip install coverage` pour installer l'outil
@@ -89,13 +96,14 @@ Ici, on verse (1) dans (2) :
   `coverage run -m pytest` pour lancer la couverture de code des tests unitaires avec `pytest`
   `coverage report` pour un résumé de la couverture de code (console)
   `coverage report -m` pour un résume de la couverture de code avec les numéros de lignes non couvertes
-  'coverage html' pour générer un rapport dans ./htmpcov (ouvrir index.html)
+  `coverage html` pour générer un rapport dans ./htmlcov (ouvrir index.html)
 
 ### pytest-cov
 
   Il existe également `pytest-cov` pour avoir `pytest` et `coverage` en même temps:
   `pip install pytest-cov`
-  `pytest --cov` pour avoir la couverture de code directement affichée.
+  `pytest . --cov` pour avoir la couverture de code directement affichée
+  `pytest . --cov --cov_report=html` pour avoir la couverture de code au format html (idem coverage html)
 
 ### cProfile
 
