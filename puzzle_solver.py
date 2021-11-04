@@ -202,7 +202,7 @@ def solve_generic(
     time_solving = time.time() - time_start
 
     if solution:
-        print(f"Solution (en {time_solving:.3f} secs) :")
+        print(f"Solution ({time_solving:.3f} secs) :")
         print(solution.show_puzzle_chains())
     else:
         print(f"Non résolu : {puzzle}\n")
