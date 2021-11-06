@@ -2,26 +2,26 @@
 
 import pytest
 
-from eprouvette import Eprouvette
+from bottle import Bottle
 from puzzle import Puzzle
 
 
 def test_puzzle():
-    p = Puzzle([Eprouvette(["R", "R"]), Eprouvette(["R"])])
-    p.add_eprouvette(Eprouvette(["R"]))
+    p = Puzzle([Bottle(["R", "R"]), Bottle(["R"])])
+    p.add_bottle(Bottle(["R"]))
 
 
 def test_puzzle_len():
     p = Puzzle()
     assert len(p) == 0
-    p.add_eprouvette(Eprouvette(["R"]))
+    p.add_bottle(Bottle(["R"]))
     assert len(p) == 1
 
 
 def test_puzzle_items():
-    e_0 = Eprouvette(["A"])
-    e_1 = Eprouvette(["B"])
-    e_2 = Eprouvette(["C"])
+    e_0 = Bottle(["A"])
+    e_1 = Bottle(["B"])
+    e_2 = Bottle(["C"])
     p = Puzzle([e_0, e_1, e_2])
     assert p[0] == e_0
     assert p[1] == e_1
@@ -29,7 +29,7 @@ def test_puzzle_items():
 
 
 def test_puzzle_repr():
-    p = Puzzle([Eprouvette(["A", "B"]), Eprouvette(["C"])])
+    p = Puzzle([Bottle(["A", "B"]), Bottle(["C"])])
     puzzle_repr = f"{p}"
     assert "A" in puzzle_repr
     assert "B" in puzzle_repr
@@ -37,7 +37,7 @@ def test_puzzle_repr():
 
 
 @pytest.mark.parametrize(
-    "contenu0, contenu1, same",
+    "content0, content1, same",
     [
         ([""], [""], True),
         ([""], ["A"], False),
@@ -51,19 +51,19 @@ def test_puzzle_repr():
         (["", "AB", "B"], ["B", "", "AB"], True),
     ],
 )
-def test_puzzle_is_same_as(contenu0, contenu1, same):
+def test_puzzle_is_same_as(content0, content1, same):
 
-    assert not Puzzle().is_same_as("Objet_qui_n_est_pas_un_puzzle")
+    assert not Puzzle().is_same_as("Objet_that_is_not_a_puzzle")
 
     p0 = Puzzle()
-    for list_liquide in contenu0:
-        e = Eprouvette(list_liquide)
-        p0.add_eprouvette(e)
+    for list_colors in content0:
+        e = Bottle(list_colors)
+        p0.add_bottle(e)
 
     p1 = Puzzle()
-    for list_liquide in contenu1:
-        e = Eprouvette(list_liquide)
-        p1.add_eprouvette(e)
+    for list_colors in content1:
+        e = Bottle(list_colors)
+        p1.add_bottle(e)
 
     if same:
         assert p0.is_same_as(p1)
@@ -74,15 +74,15 @@ def test_puzzle_is_same_as(contenu0, contenu1, same):
 
 
 def test_puzzle_clone():
-    p = Puzzle([Eprouvette(["A", "A"]), Eprouvette(["B"])])
+    p = Puzzle([Bottle(["A", "A"]), Bottle(["B"])])
     p2 = p.clone()
     assert p.is_same_as(p2)
 
 
 def test_puzzle_permutations():
-    e_a = Eprouvette(["A"])
-    e_b = Eprouvette(["B"])
-    e_c = Eprouvette(["C"])
+    e_a = Bottle(["A"])
+    e_b = Bottle(["B"])
+    e_c = Bottle(["C"])
     p = Puzzle([e_a, e_b, e_c])
     permutations = [perm for perm in p.iter_permutations()]
     assert len(permutations) == 6
@@ -94,25 +94,25 @@ def test_puzzle_permutations():
     assert (e_c, e_b) in permutations
 
 
-def test_puzzle_is_consistant_nb_doses_liquide():
+def test_puzzle_is_consistent_full_dose():
     p = Puzzle()
-    for nb_doses in range(Eprouvette.MAX_DOSES):
-        p.add_eprouvette(Eprouvette(["A"]))
-        if nb_doses == Eprouvette.MAX_DOSES - 1:
-            assert p.is_consistant
+    for nb_doses in range(Bottle.MAX_DOSES):
+        p.add_bottle(Bottle(["A"]))
+        if nb_doses == Bottle.MAX_DOSES - 1:
+            assert p.is_consistent
         else:
-            assert not p.is_consistant
+            assert not p.is_consistent
 
 
-def test_puzzle_is_consistant_nb_doses_vides():
-    list_liquides = ["A" for _ in range(Eprouvette.MAX_DOSES)]
-    e = Eprouvette(list_liquides)
+def test_puzzle_is_consistent_empty_dose():
+    list_colors = ["A" for _ in range(Bottle.MAX_DOSES)]
+    e = Bottle(list_colors)
     p = Puzzle([e])
-    assert not p.is_consistant
+    assert not p.is_consistent
 
 
 @pytest.mark.parametrize(
-    "contenu, done",
+    "content, done",
     [
         ([""], True),
         (["A"], False),
@@ -126,15 +126,15 @@ def test_puzzle_is_consistant_nb_doses_vides():
         (["AAAA", "BBBB", ""], True),
     ],
 )
-def test_puzzle_is_done(contenu, done):
+def test_puzzle_is_done(content, done):
 
-    # Ce test est prévu pour des éprouvettes de 4 doses
-    assert Eprouvette.MAX_DOSES == 4
+    # This test is valid only with 4 doses bottles
+    assert Bottle.MAX_DOSES == 4
 
     p = Puzzle()
-    for list_strings in contenu:
-        e = Eprouvette(list_strings)
-        p.add_eprouvette(e)
+    for list_strings in content:
+        e = Bottle(list_strings)
+        p.add_bottle(e)
 
     if done:
         assert p.is_done
@@ -142,16 +142,16 @@ def test_puzzle_is_done(contenu, done):
         assert not p.is_done
 
 
-def test_puzzle_contains_eprouvette_vide():
+def test_puzzle_contains_empty_bottle():
 
     p = Puzzle()
-    assert not p.contains_eprouvette_vide()
+    assert not p.contains_empty_bottle()
 
-    p.add_eprouvette(Eprouvette("ABC"))
-    assert not p.contains_eprouvette_vide()
+    p.add_bottle(Bottle("ABC"))
+    assert not p.contains_empty_bottle()
 
-    p.add_eprouvette(Eprouvette(""))
-    assert p.contains_eprouvette_vide()
+    p.add_bottle(Bottle(""))
+    assert p.contains_empty_bottle()
 
 
 if __name__ == "__main__":

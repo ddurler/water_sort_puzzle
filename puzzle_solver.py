@@ -1,6 +1,6 @@
 #! coding:utf-8
 
-# Import pour pouvoir faire du typing :PuzzleChain dans la classe PuzzleChain
+# Import to do typing :PuzzleChain inside class PuzzleChain
 from __future__ import annotations
 
 from itertools import permutations
@@ -8,42 +8,54 @@ import collections
 import time
 import math
 
-from eprouvette import Eprouvette
+from bottle import Bottle
 from puzzle import Puzzle
 
 
 class PuzzleChain:
     """
-    Un puzzle chain permet de chaîner les puzzles entre un previous_puzzle (précédent) qui peut
-    se transformer en un puzzle
+    PuzzleChain links puzzle move from a previous PuzzleChain to a new puzzle.
+
+    It could be a dataclass but it also has the responsability of counting the consecutive moves
+    without having an empty bottle in the chained puzzles.
+
+    Showing the whole chain results is also in the scope of this class.
     """
 
-    __slots__ = "previous_puzzle_chain", "puzzle", "message", "nb_chains_sans_vide"
+    # Speedup properties for this class
+    __slots__ = (
+        "previous_puzzle_chain",
+        "puzzle",
+        "message",
+        "nb_chains_without_empty_bottle",
+    )
 
     def __init__(
         self, previous_puzzle_chain: PuzzleChain | None, puzzle: Puzzle, message: str
     ) -> None:
         """
-        PuzzleChain contenant le puzzle précédent ou None pour le 1e
-        Puzzle courant de la chaîne
-        Message indiquant la construction du puzzle courant depuis le précédent
+        PuzzleChain containing the previous puzzle or None for the first one
+        Puzzle in chain
+        Message indicating the move to do from the previous puzzle that leads to this puzzle
         """
         self.previous_puzzle_chain = previous_puzzle_chain
         self.puzzle = puzzle
         self.message = message
 
-        # Nombre de PuzzleChain qui se suivent sans que le puzzle contienne au moins une éprouvetee vide
+        # Number of previous PuzzleChain with having at least one empty bottle
         if previous_puzzle_chain is None:
-            self.nb_chains_sans_vide = 0
-        elif puzzle.contains_eprouvette_vide():
-            self.nb_chains_sans_vide = 0
+            self.nb_chains_without_empty_bottle = 0
+        elif puzzle.contains_empty_bottle():
+            self.nb_chains_without_empty_bottle = 0
         else:
-            self.nb_chains_sans_vide = previous_puzzle_chain.nb_chains_sans_vide + 1
+            self.nb_chains_without_empty_bottle = (
+                previous_puzzle_chain.nb_chains_without_empty_bottle + 1
+            )
 
     def show_puzzle_chains(self) -> str:
-        """Affiche la liste des puzzles chaînés."""
+        """Show the full PuzzleChain's from the start given one end PuzzleChain."""
 
-        # Reconstitue la liste des puzzles
+        # Create list of puzzles in the chain
         q: collections.deque[PuzzleChain] = collections.deque()
         q.append(self)
         previous = self.previous_puzzle_chain
@@ -51,7 +63,7 @@ class PuzzleChain:
             q.append(previous)
             previous = previous.previous_puzzle_chain
 
-        # Reconstitue les étapes de résolution
+        # Show all moves
         ret = ""
         step = 1
         while len(q):
@@ -63,20 +75,28 @@ class PuzzleChain:
 
 class PuzzleSolver:
     """
-    Un puzzle solver permet la résolution d'un puzzle.
+    PuzzleSolver is for one Puzzle solving.
 
-    La résolution se fait en explorant toutes les combinaisons possibles depuis chaque situation.
-    La situation initiale étant le puzzle d'origine.
+    The solving uses 'brut force' to compute all possible moves from each possible situation.
+    The initial situation is the puzzle to solve.
+
+    It is possible to specify a maximum number of consecutive moves having an empty bottle
+    in the puzzle.
+    When used, this option will not give the optimal solution but it is likely to find a solution
+    that matches human ways of solving the puzzle.
+
+    If computing takes long times, it is also possible to activate the verbose mode that prints
+    regular data on actual computation.
     """
 
     def __init__(self, puzzle: Puzzle) -> None:
-        if not puzzle.is_consistant:
-            raise ValueError(f"Puzzle inconsistant : {puzzle}")
+        if not puzzle.is_consistent:
+            raise ValueError(f"Bad puzzle: {puzzle}")
         self.puzzle: Puzzle = puzzle.clone()
 
     @staticmethod
     def str_second(sec: float) -> str:
-        """Convertion d'une durée en secondes en une chaîne heure + minute + seconde."""
+        """Convert second duration into hours, minutes and seconds to be printed."""
         sec_value = int(sec) % (24 * 3600)
         hour_value = sec_value // 3600
         sec_value %= 3600
@@ -92,8 +112,8 @@ class PuzzleSolver:
     @staticmethod
     def estimated_time(nb_todo: int, nb_done: int, time_done: float) -> float:
         """
-        @return temps estimé pour calculer nb_todo sachant que le temps pour nb_done est time_done
-        On considère ici qu'on est dans un modèle exponentiel : t = math.exp(a * nb)
+        @return estimated duration to compute nb_todo given time_done for computing nb_done.
+        This model used here is an exponential one: t = math.exp(a * nb)
         """
         try:
             a: float = math.log(time_done) / nb_done
@@ -103,34 +123,40 @@ class PuzzleSolver:
             return 0
 
     def solve(
-        self, nb_chains_sans_vide: int = 0, verbose_cycle: float = 0.0
+        self, nb_chains_without_empty_bottle: int = 0, verbose_cycle: float = 0.0
     ) -> PuzzleChain | None:
         """
-        Résout le puzzle.
-        nb_chains_sans_vide : Si non nul, nombre max de mouvements consécutifs sans constater une éprouvette vide.
-        verbose_cycle : Si non nul, trace périodique (en secondes) de l'état d'avancement
+        Solve the puzzle.
+        nb_chains_without_empty_bottle: If not nul, defines the max consecutive possible moves without seing an
+            empty bottle in the puzzle.
+            To be used for more human likely solution finding.
+        verbose_cycle: If not nul, periodical trace (in secondes) of the current solving situation.
+            To be used in case of long computations.
         """
         time_start = time.time()
         next_time_verbose: float = verbose_cycle
 
-        # Liste des puzzles à examiner
-        # On initialise cette liste avec le puzzle d'origine qui n'a pas de prédécesseur
+        # List of Puzzles to do
+        # The first item in this list is the initial puzzle to solve which has no previous puzzle.
         self.puzzle_chains_todo: collections.deque[PuzzleChain] = collections.deque()
         self.puzzle_chains_todo.append(
             PuzzleChain(
-                previous_puzzle_chain=None, puzzle=self.puzzle, message="Puzzle initial"
+                previous_puzzle_chain=None, puzzle=self.puzzle, message="Puzzle:"
             )
         )
 
-        # Liste des puzzles déjà examinés (vide au début de la résolution)
+        # List of puzzles that have been computed (empty at the begining)
         self.puzzle_chains_done: collections.deque[PuzzleChain] = collections.deque()
 
         # Examination loop
         nb_loops: int = 0
         nb_dropped_puzzles: int = 0
+
         while len(self.puzzle_chains_todo):
             nb_loops += 1
             current_time = time.time() - time_start
+
+            # Verbosity ?
             if verbose_cycle and current_time > next_time_verbose:
                 next_time_verbose += verbose_cycle
                 nb_done = len(self.puzzle_chains_done)
@@ -138,27 +164,39 @@ class PuzzleSolver:
                 time_todo = self.estimated_time(nb_todo, nb_done, current_time)
                 if nb_done + nb_todo > 0:
                     print(
-                        f"Solving after {self.str_second(current_time)}: loops=#{nb_loops}, todo={nb_todo}, "
+                        f"Computation after {self.str_second(current_time)}: loops=#{nb_loops}, todo={nb_todo}, "
                         f"done={nb_done}, ratio done/todo={(100 *nb_done) / (nb_done + nb_todo):.1f}%, "
                         f"dropped={nb_dropped_puzzles}, "
                         f"solution in {self.str_second(time_todo)}..."
                     )
+
+            # Next puzzle in the todo list
             p = self.puzzle_chains_todo.pop()
-            if nb_chains_sans_vide and p.nb_chains_sans_vide >= nb_chains_sans_vide:
+
+            # Drop it if too many moves without an empty bottle
+            if (
+                nb_chains_without_empty_bottle
+                and p.nb_chains_without_empty_bottle >= nb_chains_without_empty_bottle
+            ):
                 nb_dropped_puzzles += 1
                 continue
-            if (ret := self._explore_puzzle_chain(p)) is not None:
+
+            # Compute this puzzle
+            if (ret := self._explore_a_puzzle_chain(p)) is not None:
                 return ret  # Solution found
+
+        # No more puzzle in the todo list
         return None  # No solution
 
-    def _explore_puzzle_chain(self, puzzle_chain: PuzzleChain) -> PuzzleChain | None:
-        """Explore les combinaisons depuis un puzzle."""
+    def _explore_a_puzzle_chain(self, puzzle_chain: PuzzleChain) -> PuzzleChain | None:
+        """Considering all possible moves from puzzle in this PuzzleChain."""
         if self.is_puzzle_already_done(puzzle_chain.puzzle):
             return None
         self.puzzle_chains_done.append(puzzle_chain)
         return self._generate_puzzle_chains_todo_from(puzzle_chain)
 
     def is_puzzle_already_done(self, puzzle: Puzzle) -> bool:
+        """Return True if a similar puzzle is already in the done list"""
         for puzzle_chain in self.puzzle_chains_done:
             if puzzle.is_same_as(puzzle_chain.puzzle):
                 return True
@@ -167,20 +205,24 @@ class PuzzleSolver:
     def _generate_puzzle_chains_todo_from(
         self, puzzle_chain: PuzzleChain
     ) -> PuzzleChain | None:
-        """Ajoute tous les puzzles interessants depuis le puzzle de puzzle_chain dans la queue à traiter."""
+        """Add all interesting possible moves from the puzzle in this PuzzleChain in the todo queue."""
         puzzle: Puzzle = puzzle_chain.puzzle
+
+        # Consider every 2-bottles permutations in the puzzle
         for (i_source, i_destination) in permutations(range(len(puzzle)), 2):
-            eprouvette_source: Eprouvette = puzzle[i_source]
-            eprouvette_destination: Eprouvette = puzzle[i_destination]
-            if eprouvette_source.is_interessant_verser_dans(eprouvette_destination):
+            bottle_source: Bottle = puzzle[i_source]
+            bottle_destination: Bottle = puzzle[i_destination]
+
+            if bottle_source.is_interesting_to_pour_into(bottle_destination):
+                # Create a copy for this new possible intereting move
                 new_puzzle = puzzle.clone()
-                eprouvette_source = new_puzzle[i_source]
-                eprouvette_destination = new_puzzle[i_destination]
-                eprouvette_source.verser_dans(eprouvette_destination)
+                bottle_source = new_puzzle[i_source]
+                bottle_destination = new_puzzle[i_destination]
+                bottle_source.pour_into(bottle_destination)
                 new_puzzle_chain = PuzzleChain(
                     previous_puzzle_chain=puzzle_chain,
                     puzzle=new_puzzle,
-                    message=f"Verser #{i_source + 1} dans #{i_destination + 1}",
+                    message=f"Pour #{i_source + 1} into #{i_destination + 1}",
                 )
                 self.puzzle_chains_todo.append(new_puzzle_chain)
                 if new_puzzle.is_done:
@@ -189,39 +231,39 @@ class PuzzleSolver:
 
 
 def solve_generic(
-    puzzle: Puzzle, nb_chains_sans_vide: int = 0, verbose_cycle: float = 0
+    puzzle: Puzzle, nb_chains_without_empty_bottle: int = 0, verbose_cycle: float = 0
 ) -> None:
-    """Fonction générique pour résoudre un puzzle et afficher le résultat."""
+    """Generic function for a puzzle solving and result printing."""
 
     solver: PuzzleSolver = PuzzleSolver(puzzle)
 
     time_start = time.time()
     solution: PuzzleChain | None = solver.solve(
-        nb_chains_sans_vide=nb_chains_sans_vide, verbose_cycle=verbose_cycle
+        nb_chains_without_empty_bottle=nb_chains_without_empty_bottle,
+        verbose_cycle=verbose_cycle,
     )
     time_solving = time.time() - time_start
 
     if solution:
-        print(f"Solution ({time_solving:.3f} secs) :")
+        print(f"Solution ({time_solving:.3f} secs):")
         print(solution.show_puzzle_chains())
     else:
-        print(f"Non résolu : {puzzle}\n")
+        print(f"No solution: {puzzle}\n")
 
 
 def main():
-    """Resolution de puzzles pour test/validation."""
+    """Some puzzles solving for test/validation purpose."""
 
     def solve_puzzle0() -> None:
         """
-        Ici, chaque puzzle est représenté par une séquence de chaînes de caractères.
-        Chaque lettre d'une chaîne de caractère représente une dose d'un liquide identifié par la lettre.
+        Hereafter, bottles are defined using strings.
+        Every chars in the string is a color for one dose in a bottle (from bottom to top).
 
-        Par exemple:
-            {"AABB", "BBAA", ""}
-            représente un puzzle avec 3 éprouvettes.
-            Dans la première éprouvette "AABB", on a 2 doses de liquide 'A' et 2 doses de liquide 'B' au dessus.
-            La deuxième éprouvette "BBAA" contient l'inverse.
-            La troisième et dernière éprouvette du puzzle est vide ""
+        Example:
+            {"AABB", "BBAA", ""} is for a puzzle hodling 3 bottles:
+            The first bottle "AABB" contains 2 doses of color 'A' and 2 doses of color 'B' on top.
+            The next bottle "BBAA" contains the revert.
+            The last bottle of the puzzle is empty.
         """
 
         puzzles = [
@@ -231,71 +273,69 @@ def main():
 
         for str_puzzle in puzzles:
             puzzle: Puzzle = Puzzle()
-            for str_eprouvette in str_puzzle:
-                eprouvette: Eprouvette = Eprouvette(str_eprouvette)
-                puzzle.add_eprouvette(eprouvette)
+            for str_bottle in str_puzzle:
+                bottle: Bottle = Bottle(str_bottle)
+                puzzle.add_bottle(bottle)
             solve_generic(puzzle)
 
-    # Couleurs des puzzles
-    VERT = 0
-    ROSE = 1
-    JAUNE = 2
-    BLEU_FONCE = 3
-    GRIS = 4
-    BLEU_CLAIR = 5
-    ROUGE = 6
+    # Puzzle colors
+    GREEN = 0
+    PINK = 1
+    YELLOW = 2
+    DARK_BLUE = 3
+    GRAY = 4
+    LIGHT_BLUE = 5
+    RED = 6
     ORANGE = 7
     VIOLET = 8
 
     def solve_puzzle29() -> None:
         """
-        Puzzle #29 du jeu 'Water Sort Puzzle' sur Andoid OS
-        Voir 'solve_puzzle29 output.txt' pour le résultat'
+        Puzzle #29 in 'Water Sort Puzzle' (Andoid OS)
         """
 
         solve_generic(
             Puzzle(
                 [
-                    Eprouvette([VERT, ROSE, JAUNE, BLEU_FONCE]),
-                    Eprouvette([GRIS, JAUNE, BLEU_CLAIR, BLEU_CLAIR]),
-                    Eprouvette([GRIS, ROUGE, GRIS, ROUGE]),
-                    Eprouvette([VERT, BLEU_FONCE, ORANGE, VERT]),
-                    Eprouvette([ORANGE, ROSE, ROSE, ORANGE]),
-                    Eprouvette([JAUNE, VIOLET, GRIS, VIOLET]),
-                    Eprouvette([BLEU_CLAIR, ROSE, VIOLET, JAUNE]),
-                    Eprouvette([BLEU_CLAIR, VIOLET, ORANGE, BLEU_FONCE]),
-                    Eprouvette([BLEU_FONCE, ROUGE, VERT, ROUGE]),
-                    Eprouvette([]),
-                    Eprouvette([]),
+                    Bottle([GREEN, PINK, YELLOW, DARK_BLUE]),
+                    Bottle([GRAY, YELLOW, LIGHT_BLUE, LIGHT_BLUE]),
+                    Bottle([GRAY, RED, GRAY, RED]),
+                    Bottle([GREEN, DARK_BLUE, ORANGE, GREEN]),
+                    Bottle([ORANGE, PINK, PINK, ORANGE]),
+                    Bottle([YELLOW, VIOLET, GRAY, VIOLET]),
+                    Bottle([LIGHT_BLUE, PINK, VIOLET, YELLOW]),
+                    Bottle([LIGHT_BLUE, VIOLET, ORANGE, DARK_BLUE]),
+                    Bottle([DARK_BLUE, RED, GREEN, RED]),
+                    Bottle([]),
+                    Bottle([]),
                 ]
             ),
-            nb_chains_sans_vide=4,
+            nb_chains_without_empty_bottle=4,
             verbose_cycle=10,
         )
 
     def solve_puzzle37() -> None:
         """
-        Puzzle #37 du jeu 'Water Sort Puzzle' sur Andoid OS
-        Voir 'solve_puzzle37 output.txt' pour le résultat'
+        Puzzle #37 in 'Water Sort Puzzle' (Andoid OS)
         """
 
         solve_generic(
             Puzzle(
                 [
-                    Eprouvette([ROSE, BLEU_CLAIR, ROUGE, ORANGE]),
-                    Eprouvette([VIOLET, VERT, GRIS, BLEU_FONCE]),
-                    Eprouvette([ORANGE, GRIS, ROUGE, VIOLET]),
-                    Eprouvette([BLEU_FONCE, BLEU_CLAIR, BLEU_CLAIR, ROUGE]),
-                    Eprouvette([ROSE, BLEU_CLAIR, VERT, ROSE]),
-                    Eprouvette([VIOLET, JAUNE, VERT, VERT]),
-                    Eprouvette([BLEU_FONCE, ORANGE, JAUNE, GRIS]),
-                    Eprouvette([JAUNE, ROSE, ORANGE, VIOLET]),
-                    Eprouvette([GRIS, JAUNE, BLEU_FONCE, ROUGE]),
-                    Eprouvette([]),
-                    Eprouvette([]),
+                    Bottle([PINK, LIGHT_BLUE, RED, ORANGE]),
+                    Bottle([VIOLET, GREEN, GRAY, DARK_BLUE]),
+                    Bottle([ORANGE, GRAY, RED, VIOLET]),
+                    Bottle([DARK_BLUE, LIGHT_BLUE, LIGHT_BLUE, RED]),
+                    Bottle([PINK, LIGHT_BLUE, GREEN, PINK]),
+                    Bottle([VIOLET, YELLOW, GREEN, GREEN]),
+                    Bottle([DARK_BLUE, ORANGE, YELLOW, GRAY]),
+                    Bottle([YELLOW, PINK, ORANGE, VIOLET]),
+                    Bottle([GRAY, YELLOW, DARK_BLUE, RED]),
+                    Bottle([]),
+                    Bottle([]),
                 ]
             ),
-            nb_chains_sans_vide=4,
+            nb_chains_without_empty_bottle=4,
             verbose_cycle=10,
         )
 

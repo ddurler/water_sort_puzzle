@@ -1,16 +1,16 @@
 """
-Exemple de résolution du puzzle.
-Voir le fichier README.md pour les explications
+Puzzle resolution example.
+See README.md file.
 """
 
-# Import des définitions nécessaires
-from eprouvette import Eprouvette
+# Import required modules
+from bottle import Bottle
 from puzzle import Puzzle
 from puzzle_solver import solve_generic
 
 """
-Définition du puzzle à résoudre
-Ici :
+Puzzle to be solved in this example:
+
         | R |    |   |    | V |   |   |
         | R |    |   |    | V |   |   |
         | B |    | R |    | B |   | V |
@@ -18,9 +18,7 @@ Ici :
         -----    -----    -----   -----
          (1)      (2)      (3)     (4)
 """
-puzzle: Puzzle = Puzzle(
-    [Eprouvette("BBRR"), Eprouvette("RR"), Eprouvette("BBVV"), Eprouvette("VV")]
-)
+puzzle: Puzzle = Puzzle([Bottle("BBRR"), Bottle("RR"), Bottle("BBVV"), Bottle("VV")])
 
-# Résolution
+# Solving
 solve_generic(puzzle)
