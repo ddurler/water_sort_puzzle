@@ -1,21 +1,22 @@
 # Water Sort Puzzle
 
-`Water Sort Puzzle` est un jeu où on doit transvaser des éprouvettes les unes dans les autres pour trier leur
-contenu.
+`Water Sort Puzzle` is a game starting with several bottles having different colored water in them.  
+The goal is to have the same color in each bottle or empty bottles.
 
-Au début du jeu, un `puzzle` à résoudre avec X éprouvettes contenant chacune jusqu'à Y doses
-de liquides différents.
+At the beginning, a `puzzle` to be solved contains `Bottle`'s.  
+Each `Bottle` might have up to max 4 doses of same or different colors.
 
-_Ici, Y = constante (= 4) définie dans la classe `Eprouvette`._
+_In here, this constant MAX_DOSES = 4 is defined in the `Bottle` class._
 
-On ne peut verser une éprouvette dans une autre que si :
+A bottle can be pored into another bottle only if:
 
-* Il y a au moins une dose de liquide dans l'éprouvette d'origine
-* L'éprouvette destination contient au moins une dose vide
-* Si l'éprouvette destination n'est pas vide, le type de liquide qui va être versé de l'éprouvette d'origine
-  vers l'éprouvette destination doit correspondre
+* There is at least one dose of colored water at the top of the source bottle
+* There is at least one empty dose in the destination bottle
+* In case the destination bottle is not empty, its top color must match the top color in the source bottle
 
-Exemple :
+When poured, all possible colored doses from the source bottle go to the destination bottle.
+
+Example :
 
 ```
 | R |    |   |    | V |   |   |
@@ -26,17 +27,27 @@ Exemple :
  (1)      (2)      (3)     (4)
 ```
 
-On a ici 4 éprouvettes contenant 4 doses au maximum.
+Here are 4 bottles with max 4 doses of colored water in each.
 
-La première éprouvette (1) contient 2 doses de B et 2 doses de R au dessus.  
-On peut verser le contenu de (1) dans (2) car les il y a du R dans (2).  
-On ne peut pas verser (1) dans (3) parce que (3) est déjà rempli.  
-On ne peut pas verser (1) dans (4) parce qu'il y a du V dans (4) et que (1) verse du R.  
+The first bottle (1) contains 2 doses of B and 2 doses of R on its top.  
+One can pour bottle (1) into bottle (2) as there is R in (2).  
+One cannot pour bottle (1) into (3) because bottle (3) is already full.  
+One cannot pour bottle (1) into (4) because there is V on top of bottle (4) and bottle (1) pours color R.  
 
-L'**objectif** est d'effectuer les manipulations nécessaires pour que chaque éprouvette ne contient qu'un
-seul même liquide.
+The **goal** is to find the moves to finally gets one-color only or empty bottles.
 
-Ici, on verse (1) dans (2) :
+Starting from this example:
+
+```
+| R |    |   |    | V |   |   |
+| R |    |   |    | V |   |   |
+| B |    | R |    | B |   | V |
+| B |    | R |    | B |   | V |
+-----    -----    -----   -----
+ (1)      (2)      (3)     (4)
+```
+
+Pour (1) into (2) :
 
 ```
 |   |    | R |    | V |   |   |
@@ -47,7 +58,7 @@ Ici, on verse (1) dans (2) :
  (1)      (2)      (3)     (4)
 ```
 
- On verse (3) dans (4) :
+ Pour (3) into (4) :
 
 ```
 |   |    | R |    |   |   | V |
@@ -58,7 +69,7 @@ Ici, on verse (1) dans (2) :
  (1)      (2)      (3)     (4)
 ```
 
- Et on verse (1) dans (3) :
+ And pour (1) into (3) :
 
 ```
 |   |    | R |    | B |   | V |
@@ -69,79 +80,80 @@ Ici, on verse (1) dans (2) :
  (1)      (2)      (3)     (4)
 ```
 
-Et c'est terminé...
+And it's done...
 
-## Comment résoudre un puzzle
+## How to solve a puzzle
 
-Voici comment le puzzle ci-dessus peut être résolu.
+To solve a puzzle, proceed as follows with the content of this module;
 
-Il faut créer un nouveau fichier python dans ce répertoire : `mon_puzzle.py` par exemple.
+First, create a new python file in the directory: `my_puzzle.py` for instance.
 
-Au début du fichier, on importe les définitions nécessaires :
+Edit this file and first, import the required modules:
 
 ```
-from eprouvette import Eprouvette
+from bottle import Bottle
 from puzzle import Puzzle
-from puzzle_solver import PuzzleSolver, solve_generic
+from puzzle_solver import solve_generic
 ```
 
-Puis on définit le puzzle à résoudre par la suite des éprouvettes contenue dans le puzzle.
+Then, define the puzzle to be solved by describing its bottles content.
 
-_Rappel : Le contenu des éprouvettes est défini de bas en haut._
+_Reminder : Bottle content is defined from bottom to top._
 
-On peut utiliser n'importe quel type d'objet pour identifier les différents liquides dans les éprouvettes.  
-Si on choisit une lettre, le contenu d'une éprouvette devient alors une simple chaîne de caractères
-puisque qu'une string est itérable.
+Any object can be used as a color in the bottles.    
+As python strings are simple chars sequences, an easy way is to choose a different letter for every color.
 
-Pour le puzzle montré en introduction de ce document, on aurait :
+The puzzle shown in the introduction chapter would then simply be:
 
 ```
 puzzle: Puzzle = Puzzle(
-    [Eprouvette("BBRR"), Eprouvette("RR"), Eprouvette("BBVV"), Eprouvette("VV")]
+    [Bottle("BBRR"), Bottle("RR"), Bottle("BBVV"), Bottle("VV")]
 )
 ```
 
-Puis, le calcul de résolution de ce puzzle : `solve_generic(puzzle)`
+To computing the solution: `solve_generic(puzzle)`
 
-On a donc un fichier `mon_puzzle.py` avec :
+Thus, the entire `my_puzzle.py` file content is:
 
 ```
-from eprouvette import Eprouvette
+from bottle import Bottle
 from puzzle import Puzzle
 from puzzle_solver import solve_generic
 
 puzzle = Puzzle(
-    [Eprouvette("BBRR"), Eprouvette("RR"), Eprouvette("BBVV"), Eprouvette("VV")]
+    [Bottle("BBRR"), Bottle("RR"), Bottle("BBVV"), Bottle("VV")]
 )
 
 solve_generic(puzzle)
 
 ```
 
-La résolution est lancée par la commande python `python mon_puzzle.py`.
-On a alors le résultat suivant :
+And the python command to run is: `python my_puzzle.py`
+
+
+This gives the following output:
 
 ```
-Solution (0.001 secs) :
-Step#1: Puzzle initial:
+Solution (0.000 secs):
+Step#1: Puzzle::
   Puzzle<#1<['B', 'B', 'R', 'R']>, #2<['R', 'R']>, #3<['B', 'B', 'V', 'V']>, #4<['V', 'V']>>
-Step#2: Verser #3 dans #4:
+Step#2: Pour #3 into #4:
   Puzzle<#1<['B', 'B', 'R', 'R']>, #2<['R', 'R']>, #3<['B', 'B']>, #4<['V', 'V', 'V', 'V']>>
-Step#3: Verser #1 dans #2:
+Step#3: Pour #1 into #2:
   Puzzle<#1<['B', 'B']>, #2<['R', 'R', 'R', 'R']>, #3<['B', 'B']>, #4<['V', 'V', 'V', 'V']>>
-Step#4: Verser #1 dans #3:
+Step#4: Pour #1 into #3:
   Puzzle<#1<[]>, #2<['R', 'R', 'R', 'R']>, #3<['B', 'B', 'B', 'B']>, #4<['V', 'V', 'V', 'V']>>
 ```
 
 ## puzzle_solver
 
-La classe `puzzle_solver` permet de résoudre les `puzzle`:
+`puzzle_solver` class is for solving `puzzle`:
 
 ```
   solver: PuzzleSolver = PuzzleSolver(puzzle)
 
-  solution: PuzzleChain | None = solver.solve(
-      nb_chains_sans_vide=nb_chains_sans_vide, verbose_cycle=verbose_cycle
+  solution: Optional[PuzzleChain] = solver.solve(
+      nb_chains_without_empty_bottle=nb_chains_without_empty_bottle, verbose_cycle=verbose_cycle
   )
 
   if solution:
@@ -150,64 +162,66 @@ La classe `puzzle_solver` permet de résoudre les `puzzle`:
       print(f"Non résolu : {puzzle}\n") 
 ```
 
-Paramètres de la méthode **solve** :
+**solve** method parameters:
 
-* **nb_chains_sans_vide** : Si non nul, défini un nombre maximum de mouvements avant d'observer au moins une
-  éprouvette vide dans le le puzzle. En activant ce paramètre, on obtient une solution non optimale mais
-  plus proche d'une séquence qu'un humain pourrait découvrir
+* **nb_chains_without_empty_bottle** : If not nul, defines the max consecutive possible moves without seing an
+  empty bottle in the puzzle. To be used for more human likely solution finding.
 
-* **verbose_cycle** : Si non nul, défini une période en seconde pour que l'algorithme de recherche donne
-  des indications sur son avancement
+* **verbose_cycle** : If not nul, periodical trace (in seconds) of the current solving situation.
+  To be used in case of long computations.
 
 
 ## puzzle
 
-Les `puzzle` sont des collections d'`eprouvette`.
+A `puzzle` is a list of `bottle's.
 
 ```
-    VERT = 0
-    ROSE = 1
-    JAUNE = 2
-    BLEU_FONCE = 3
-    GRIS = 4
-    BLEU_CLAIR = 5
-    ROUGE = 6
+    GREEN = 0
+    PINK = 1
+    YELLOW = 2
+    DARK_BLUE = 3
+    GRAY = 4
+    LIGHT_BLUE = 5
+    RED = 6
     ORANGE = 7
     VIOLET = 8
 
     puzzle: Puzzle = Puzzle(
     [
-        Eprouvette([VERT, ROSE, JAUNE, BLEU_FONCE]),
-        Eprouvette([GRIS, JAUNE, BLEU_CLAIR, BLEU_CLAIR]),
-        Eprouvette([GRIS, ROUGE, GRIS, ROUGE]),
-        Eprouvette([VERT, BLEU_FONCE, ORANGE, VERT]),
-        Eprouvette([ORANGE, ROSE, ROSE, ORANGE]),
-        Eprouvette([JAUNE, VIOLET, GRIS, VIOLET]),
-        Eprouvette([BLEU_CLAIR, ROSE, VIOLET, JAUNE]),
-        Eprouvette([BLEU_CLAIR, VIOLET, ORANGE, BLEU_FONCE]),
-        Eprouvette([BLEU_FONCE, ROUGE, VERT, ROUGE]),
-        Eprouvette([]),
-        Eprouvette([]),
+        Bottle([GREEN, PINK, YELLOW, DARK_BLUE]),
+        Bottle([GRAY, YELLOW, LIGHT_BLUE, LIGHT_BLUE]),
+        Bottle([GRAY, RED, GRAY, RED]),
+        Bottle([GREEN, DARK_BLUE, ORANGE, GREEN]),
+        Bottle([ORANGE, PINK, PINK, ORANGE]),
+        Bottle([YELLOW, VIOLET, GRAY, VIOLET]),
+        Bottle([LIGHT_BLUE, PINK, VIOLET, YELLOW]),
+        Bottle([LIGHT_BLUE, VIOLET, ORANGE, DARK_BLUE]),
+        Bottle([DARK_BLUE, RED, GREEN, RED]),
+        Bottle([]),
+        Bottle([]),
     ]
 ),
 ```
 
-Un puzzle est valide pour être résolu s'il contient au moins le contenu une éprouvette vide (mais pas
-forcément dans la même éprouvette) et que le nombre de doses des différentes couleurs est un multiple 
-de la taille d'une éprouvette (4 doses).
+A puzzle is 'consistent' if a solution is possible. This means that moves can be found so that bottles
+can be fulled with only one color.  
+This check is done with the following rules:
 
-## Eprouvette
+* The sum of each color dose must match the bottle dose size (4)
+* Empty doses for the content of at least one empty bottle must exist in the puzzle
 
-La classe `eprouvette` permet de créer et de résoudre les `puzzle`.  
-Une `eprouvette` contient des 'doses' de 'liquide'.  
-Par défaut, il y a 4 doses maximum par éprouvette.  
-Un liquide peut être n'importe quel objet python qui support l'opération __eq__ pour être comparée aux autres.
 
-Quand l'éprouvette est construite, les liquides sont listés 'de bas en haut':
+## Bottle
 
-`eprouvette: Eprouvette = Eprouvette("AABC")`
+The `Bottle` class is used to create and solve a `puzzle`.  
+A `Bottle` contains 'dose's of colored water (or 'color').  
+The default dose size is set to 4 doses of color per bottle.  
+In the `Bottle` class, a color can be any not None object as long it supports the __eq__ operator to be compared
+with other colors.
 
-équivaut à l'éprouvette :
+A `Bottle` is defined by specifying its color content from the bottom to the top:
+
+For instance, `bottle: Bottle = Bottle("AABC")` defines the following bottle:
 
     | C |
     | B |
@@ -215,83 +229,3 @@ Quand l'éprouvette est construite, les liquides sont listés 'de bas en haut':
     | A |
     -----
 
-## Rappels
-
-### Tests unitaires
-
-#### Unittest
-  [`unittest`](https://docs.python.org/3/library/unittest.html) est installé de base avec python.
-
-  `python -m unittest` pour dérouler tous les tests unitaires
-
-  **note** Les tests de ce module ont migrés en `pytest`.
-
-#### Pytest
-  [`pytest`](https://docs.pytest.org/) est un package à installer mais il est de + en +
-  utilisé en remplacement de `unittest`.  
-  En outre, `pytest` exécute parfaitement des des tests prévus pour `unittest`.
-
-  `pip install -U pytest` pour l'installation
-
-  `pytest` pour dérouler les tests unitaires
-
-  `pytest` déroule des différents tests en parallèle.  
-  `pytest` est plus simple pour l'écriture de tests unitaires (paramétrages, par exemple)
-
-
-### VSCode
-
-  VSCode propose un onglet `TEST` dédié à la réalisation et le suivi des tests unitaires.
-
-  Lors de la première utilisation, VSCode propose les menus pour configurer automatiquement les tests unitaires.  
-  Cette configuration est faite dans `.vscode\settings.json`
-
-### Coverage
-
-  `pip install coverage` pour installer l'outil  
-  `coverage run xyz` pour lancer la couverture de code du module xyz  
-  `coverage run -m unittest` pour lancer la couverture de code des tests unitaires avec `unittest`  
-  `coverage run -m pytest` pour lancer la couverture de code des tests unitaires avec `pytest`  
-  `coverage report` pour un résumé de la couverture de code (console)  
-  `coverage report -m` pour un résume de la couverture de code avec les numéros de lignes non couvertes  
-  `coverage html` pour générer un rapport complet dans `./htmlcov` (ouvrir `index.html`)
-
-### pytest-cov
-
-  Il existe également `pytest-cov` pour avoir `pytest` et `coverage` en même temps:  
-  `pip install pytest-cov`  
-  `pytest . --cov` pour avoir la couverture de code directement affichée  
-  `pytest . --cov --cov_report=html` pour avoir la couverture de code au format html (idem coverage html)
-
-### cProfile
-
- `python -m cProfile xyz.py` pour donner des statistiques sur le nombre d'appels de fonctions et la durée
- d'exécution dans les différentes fonctions
-
-### mypy
-
-[mypy](https://mypy.readthedocs.io/en/latest/index.html) est un outil statique pour vérifier les types d'un
-programme python.
-
-`pip install mypy` pour installer l'outil (il existe une extension pour VSCode)  
-`mypy monfichier.py` pour analyser un fichier source python  
-`pypy .` pour analyser tous les fichiers du répertoire courant  
-
- ### black
-
- [black](https://github.com/psf/black) est un outil de reformatage du code source python.
-
- `pip install black` pour installer l'outil  
- `black monfichier.py` pour modifier le code source du fichier conformément aux règles pythoniques  
- `black .` pour modifier tous les codes source d'un répertoire  
- 
- ### flake8
-
- [flake8](https://flake8.pycqa.org/en/latest/) est un autre outil d'analyse statique de code.
-
- `pip install flake8` pour installer l'outil  
- `flake8 monfichier.py` pour analyser un fichier source python  
- `flake8 .` pour analyser tous les fichiers du répertoire courant  
- `flake8 --ignore=E501 .` pour inhiber tous les warnings concernant les lignes de + de 80 caractères  
-
- ATTENTION: `black` et `flake8` se contredisent parfois sur certaines règles...

@@ -131,7 +131,7 @@ class PuzzleSolver:
         nb_chains_without_empty_bottle: If not nul, defines the max consecutive possible moves without seing an
             empty bottle in the puzzle.
             To be used for more human likely solution finding.
-        verbose_cycle: If not nul, periodical trace (in secondes) of the current solving situation.
+        verbose_cycle: If not nul, periodical trace (in seconds) of the current solving situation.
             To be used in case of long computations.
         """
         time_start = time.time()
