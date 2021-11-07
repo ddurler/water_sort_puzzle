@@ -3,7 +3,7 @@
 # Import to do typing :Puzzle inside class Puzzle
 from __future__ import annotations
 
-from typing import Any, List, Sequence, Tuple, Generator
+from typing import Any, List, Sequence, Tuple, Generator, Optional
 from collections import Counter
 from itertools import permutations
 
@@ -24,7 +24,7 @@ class Puzzle:
     # Speedup properties for this class
     __slots__ = "_bottles"
 
-    def __init__(self, bottles: Sequence[Bottle] | None = None) -> None:
+    def __init__(self, bottles: Optional[Sequence[Bottle]] = None) -> None:
         self._bottles: List[Bottle] = []
         if bottles:
             for bottle in bottles:

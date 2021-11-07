@@ -3,7 +3,7 @@
 # Import to do typing :Bottle inside class Bottle
 from __future__ import annotations
 
-from typing import Sequence, List, Set, Any
+from typing import Sequence, Optional, List, Set, Any
 
 
 class BottleError(Exception):
@@ -62,7 +62,7 @@ class Bottle:
         return len(self.colors)
 
     @property
-    def top_color(self) -> Any | None:
+    def top_color(self) -> Optional[Any]:
         """Top color in the bottle."""
         if self.nb_doses == 0:
             return None

@@ -7,6 +7,7 @@ from itertools import permutations
 import collections
 import time
 import math
+from typing import Optional
 
 from bottle import Bottle
 from puzzle import Puzzle
@@ -31,7 +32,7 @@ class PuzzleChain:
     )
 
     def __init__(
-        self, previous_puzzle_chain: PuzzleChain | None, puzzle: Puzzle, message: str
+        self, previous_puzzle_chain: Optional[PuzzleChain], puzzle: Puzzle, message: str
     ) -> None:
         """
         PuzzleChain containing the previous puzzle or None for the first one
@@ -124,7 +125,7 @@ class PuzzleSolver:
 
     def solve(
         self, nb_chains_without_empty_bottle: int = 0, verbose_cycle: float = 0.0
-    ) -> PuzzleChain | None:
+    ) -> Optional[PuzzleChain]:
         """
         Solve the puzzle.
         nb_chains_without_empty_bottle: If not nul, defines the max consecutive possible moves without seing an
@@ -188,7 +189,9 @@ class PuzzleSolver:
         # No more puzzle in the todo list
         return None  # No solution
 
-    def _explore_a_puzzle_chain(self, puzzle_chain: PuzzleChain) -> PuzzleChain | None:
+    def _explore_a_puzzle_chain(
+        self, puzzle_chain: PuzzleChain
+    ) -> Optional[PuzzleChain]:
         """Considering all possible moves from puzzle in this PuzzleChain."""
         if self.is_puzzle_already_done(puzzle_chain.puzzle):
             return None
@@ -204,7 +207,7 @@ class PuzzleSolver:
 
     def _generate_puzzle_chains_todo_from(
         self, puzzle_chain: PuzzleChain
-    ) -> PuzzleChain | None:
+    ) -> Optional[PuzzleChain]:
         """Add all interesting possible moves from the puzzle in this PuzzleChain in the todo queue."""
         puzzle: Puzzle = puzzle_chain.puzzle
 
@@ -238,7 +241,7 @@ def solve_generic(
     solver: PuzzleSolver = PuzzleSolver(puzzle)
 
     time_start = time.time()
-    solution: PuzzleChain | None = solver.solve(
+    solution: Optional[PuzzleChain] = solver.solve(
         nb_chains_without_empty_bottle=nb_chains_without_empty_bottle,
         verbose_cycle=verbose_cycle,
     )
