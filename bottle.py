@@ -124,7 +124,7 @@ class Bottle:
 
     def is_interesting_to_pour_into(self, destination: Bottle) -> bool:
         """
-        @return True if pouring into destination leads to an interresting situation.
+        @return True if pouring into destination leads to an interesting situation.
         (Quite the same as is_possible_to_pour_one_dose_into but also checking for interesting resulting situation)
         """
         if destination.nb_doses == Bottle.MAX_DOSES:

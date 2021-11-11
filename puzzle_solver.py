@@ -17,7 +17,7 @@ class PuzzleChain:
     """
     PuzzleChain links puzzle move from a previous PuzzleChain to a new puzzle.
 
-    It could be a dataclass but it also has the responsability of counting the consecutive moves
+    It could be a dataclass but it also has the responsibility of counting the consecutive moves
     without having an empty bottle in the chained puzzles.
 
     Showing the whole chain results is also in the scope of this class.
@@ -94,6 +94,8 @@ class PuzzleSolver:
         if not puzzle.is_consistent:
             raise ValueError(f"Bad puzzle: {puzzle}")
         self.puzzle: Puzzle = puzzle.clone()
+        self.puzzle_chains_todo = None
+        self.puzzle_chains_done = None
 
     @staticmethod
     def str_second(sec: float) -> str:
@@ -146,7 +148,7 @@ class PuzzleSolver:
             )
         )
 
-        # List of puzzles that have been computed (empty at the begining)
+        # List of puzzles that have been computed (empty at the beginning)
         self.puzzle_chains_done: collections.deque[PuzzleChain] = collections.deque()
 
         # Examination loop
@@ -217,7 +219,7 @@ class PuzzleSolver:
             bottle_destination: Bottle = puzzle[i_destination]
 
             if bottle_source.is_interesting_to_pour_into(bottle_destination):
-                # Create a copy for this new possible intereting move
+                # Create a copy for this new possible interesting move
                 new_puzzle = puzzle.clone()
                 bottle_source = new_puzzle[i_source]
                 bottle_destination = new_puzzle[i_destination]
