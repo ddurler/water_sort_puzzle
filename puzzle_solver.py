@@ -3,6 +3,8 @@
 # Import to do typing :PuzzleChain inside class PuzzleChain
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+
 from itertools import permutations
 import collections
 import time
@@ -13,44 +15,26 @@ from bottle import Bottle
 from puzzle import Puzzle
 
 
+@dataclass
 class PuzzleChain:
     """
-    PuzzleChain links puzzle move from a previous PuzzleChain to a new puzzle.
-
-    It could be a dataclass but it also has the responsibility of counting the consecutive moves
-    without having an empty bottle in the chained puzzles.
-
-    Showing the whole chain results is also in the scope of this class.
+    PuzzleChain links the move from a previous PuzzleChain to a new puzzle.
     """
 
-    # Speedup properties for this class
-    __slots__ = (
-        "previous_puzzle_chain",
-        "puzzle",
-        "message",
-        "nb_chains_without_empty_bottle",
-    )
+    previous_puzzle_chain: Optional[PuzzleChain]
+    puzzle: Puzzle
+    message: str
+    nb_chains_without_empty_bottle: int = field(init=False)
 
-    def __init__(
-        self, previous_puzzle_chain: Optional[PuzzleChain], puzzle: Puzzle, message: str
-    ) -> None:
-        """
-        PuzzleChain containing the previous puzzle or None for the first one
-        Puzzle in chain
-        Message indicating the move to do from the previous puzzle that leads to this puzzle
-        """
-        self.previous_puzzle_chain = previous_puzzle_chain
-        self.puzzle = puzzle
-        self.message = message
-
-        # Number of previous PuzzleChain with having at least one empty bottle
-        if previous_puzzle_chain is None:
+    def __post_init__(self):
+        # Update with the number of previous PuzzleChain having at least one empty bottle
+        if self.previous_puzzle_chain is None:
             self.nb_chains_without_empty_bottle = 0
-        elif puzzle.contains_empty_bottle():
+        elif self.puzzle.contains_empty_bottle():
             self.nb_chains_without_empty_bottle = 0
         else:
             self.nb_chains_without_empty_bottle = (
-                previous_puzzle_chain.nb_chains_without_empty_bottle + 1
+                self.previous_puzzle_chain.nb_chains_without_empty_bottle + 1
             )
 
     def show_puzzle_chains(self) -> str:
@@ -94,8 +78,6 @@ class PuzzleSolver:
         if not puzzle.is_consistent:
             raise ValueError(f"Bad puzzle: {puzzle}")
         self.puzzle: Puzzle = puzzle.clone()
-        self.puzzle_chains_todo = None
-        self.puzzle_chains_done = None
 
     @staticmethod
     def str_second(sec: float) -> str:
