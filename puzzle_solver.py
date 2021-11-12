@@ -1,5 +1,12 @@
 #! coding:utf-8
 
+"""
+puzzle_solver module is the main module for solving water sort puzzle.
+
+Define the puzzle to solve using the puzzle module and use this
+module to solve it.
+"""
+
 # Import to do typing :PuzzleChain inside class PuzzleChain
 from __future__ import annotations
 
@@ -41,18 +48,18 @@ class PuzzleChain:
         """Show the full PuzzleChain's from the start given one end PuzzleChain."""
 
         # Create list of puzzles in the chain
-        q: collections.deque[PuzzleChain] = collections.deque()
-        q.append(self)
+        puzzle_chain_queue: collections.deque[PuzzleChain] = collections.deque()
+        puzzle_chain_queue.append(self)
         previous = self.previous_puzzle_chain
         while previous is not None:
-            q.append(previous)
+            puzzle_chain_queue.append(previous)
             previous = previous.previous_puzzle_chain
 
         # Show all moves
         ret = ""
         step = 1
-        while len(q):
-            puzzle_chain: PuzzleChain = q.pop()
+        while len(puzzle_chain_queue):
+            puzzle_chain: PuzzleChain = puzzle_chain_queue.pop()
             ret += f"Step#{step}: {puzzle_chain.message}:\n  {puzzle_chain.puzzle}\n"
             step += 1
         return ret
@@ -89,20 +96,19 @@ class PuzzleSolver:
         sec_value %= 60
         if hour_value:
             return f"{hour_value} h {min_value:02d} mn {sec_value:02d} s"
-        elif min_value:
+        if min_value:
             return f"{min_value} mn {sec_value:02d} s"
-        else:
-            return f"{sec_value} secs"
+        return f"{sec_value} secs"
 
     @staticmethod
     def estimated_time(nb_todo: int, nb_done: int, time_done: float) -> float:
         """
         @return estimated duration to compute nb_todo given time_done for computing nb_done.
-        This model used here is an exponential one: t = math.exp(a * nb)
+        The 'exponential' model is used: time = math.exp(coefficient_a * nb)
         """
         try:
-            a: float = math.log(time_done) / nb_done
-            total_time = math.exp(a * (nb_done + nb_todo))
+            coefficient_a: float = math.log(time_done) / nb_done
+            total_time = math.exp(coefficient_a * (nb_done + nb_todo))
             return total_time - time_done
         except (ValueError, ZeroDivisionError, OverflowError):
             return 0
@@ -112,8 +118,8 @@ class PuzzleSolver:
     ) -> Optional[PuzzleChain]:
         """
         Solve the puzzle.
-        nb_chains_without_empty_bottle: If not nul, defines the max consecutive possible moves without seing an
-            empty bottle in the puzzle.
+        nb_chains_without_empty_bottle: If not nul, defines the max consecutive possible
+            moves without seing an empty bottle in the puzzle.
             To be used for more human likely solution finding.
         verbose_cycle: If not nul, periodical trace (in seconds) of the current solving situation.
             To be used in case of long computations.
@@ -149,25 +155,29 @@ class PuzzleSolver:
                 time_todo = self.estimated_time(nb_todo, nb_done, current_time)
                 if nb_done + nb_todo > 0:
                     print(
-                        f"Computation after {self.str_second(current_time)}: loops=#{nb_loops}, todo={nb_todo}, "
-                        f"done={nb_done}, ratio done/todo={(100 *nb_done) / (nb_done + nb_todo):.1f}%, "
+                        f"Computation after {self.str_second(current_time)}: "
+                        f"loops=#{nb_loops}, "
+                        f"todo={nb_todo}, "
+                        f"done={nb_done}, "
+                        f"ratio done/todo={(100 *nb_done) / (nb_done + nb_todo):.1f}%, "
                         f"dropped={nb_dropped_puzzles}, "
                         f"solution in {self.str_second(time_todo)}..."
                     )
 
             # Next puzzle in the todo list
-            p = self.puzzle_chains_todo.pop()
+            puzzle_chain = self.puzzle_chains_todo.pop()
 
             # Drop it if too many moves without an empty bottle
             if (
                 nb_chains_without_empty_bottle
-                and p.nb_chains_without_empty_bottle >= nb_chains_without_empty_bottle
+                and puzzle_chain.nb_chains_without_empty_bottle
+                >= nb_chains_without_empty_bottle
             ):
                 nb_dropped_puzzles += 1
                 continue
 
             # Compute this puzzle
-            if (ret := self._explore_a_puzzle_chain(p)) is not None:
+            if (ret := self._explore_a_puzzle_chain(puzzle_chain)) is not None:
                 return ret  # Solution found
 
         # No more puzzle in the todo list
@@ -192,7 +202,10 @@ class PuzzleSolver:
     def _generate_puzzle_chains_todo_from(
         self, puzzle_chain: PuzzleChain
     ) -> Optional[PuzzleChain]:
-        """Add all interesting possible moves from the puzzle in this PuzzleChain in the todo queue."""
+        """
+        Add all interesting possible moves from the puzzle in this PuzzleChain
+        in the todo queue.
+        """
         puzzle: Puzzle = puzzle_chain.puzzle
 
         # Consider every 2-bottles permutations in the puzzle

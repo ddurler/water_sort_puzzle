@@ -1,5 +1,12 @@
 #! coding:utf-8
 
+"""
+The puzzle module contains the Puzzle class that permits to define
+a water sort puzzle.
+
+It relies on the bottle module for the content of each bottle in the puzzle.
+"""
+
 # Import to do typing :Puzzle inside class Puzzle
 from __future__ import annotations
 
@@ -22,7 +29,7 @@ class Puzzle:
     """
 
     # Speedup properties for this class
-    __slots__ = "_bottles"
+    __slots__ = ("_bottles",)
 
     def __init__(self, bottles: Optional[Sequence[Bottle]] = None) -> None:
         self._bottles: List[Bottle] = []
@@ -56,7 +63,7 @@ class Puzzle:
         for self_bottle in self.iter_bottles():
             found_in_other = False
             for i, other_bottle in enumerate(other.iter_bottles()):
-                if not table[i] and self_bottle.is_same_as(other[i]):
+                if not table[i] and self_bottle.is_same_as(other_bottle):
                     table[i] = True
                     found_in_other = True
                     break
@@ -133,8 +140,8 @@ class Puzzle:
 
     def __repr__(self):
         ret = ""
-        for n, bottle in enumerate(self.iter_bottles()):
+        for i, bottle in enumerate(self.iter_bottles()):
             if ret:
                 ret += ", "
-            ret += f"#{n + 1}{bottle}"
+            ret += f"#{i + 1}{bottle}"
         return f"Puzzle<{ret}>"

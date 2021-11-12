@@ -1,5 +1,10 @@
 #! coding:utf-8
 
+"""
+The bottle module defines the Bottle class that is one element in
+a water sort puzzle.
+"""
+
 # Import to do typing :Bottle inside class Bottle
 from __future__ import annotations
 
@@ -8,9 +13,6 @@ from typing import Sequence, Optional, List, Set, Any
 
 class BottleError(Exception):
     """Exception from the Bottle class."""
-
-    def __init__(self, e=None):
-        super().__init__(e)
 
 
 class Bottle:
@@ -21,8 +23,8 @@ class Bottle:
 
     doses = [None, None, None, None] in case of empty bottle (nb_doses = 0)
     doses = ['X', None, None, None] where the bottle contains only one dose of 'X' (nb_doses = 1)
-    doses = ['X', 'Y', 'Y', None] where the bottle contains one dose of 'X' at the bottom and 2 doses of 'Y'
-            at the top (nb_doses = 3)
+    doses = ['X', 'Y', 'Y', None] where the bottle contains one dose of 'X' at the bottom and
+            2 doses of 'Y' at the top (nb_doses = 3)
             In this situation, the bottle contains 3 doses with 2 different colors
     """
 
@@ -110,7 +112,10 @@ class Bottle:
         self.nb_doses += 1
 
     def is_possible_to_pour_one_dose_into(self, destination: Bottle) -> bool:
-        """@return True if at least one dose of the top color can be poured into the destination bottle."""
+        """
+        @return True if at least one dose of the top color can be poured into
+        the destination bottle.
+        """
         if self.nb_doses == 0:
             return False
         if destination.nb_doses == 0:
@@ -125,7 +130,8 @@ class Bottle:
     def is_interesting_to_pour_into(self, destination: Bottle) -> bool:
         """
         @return True if pouring into destination leads to an interesting situation.
-        (Quite the same as is_possible_to_pour_one_dose_into but also checking for interesting resulting situation)
+        (Quite the same as is_possible_to_pour_one_dose_into but also checking for
+        interesting resulting situation)
         """
         if destination.nb_doses == Bottle.MAX_DOSES:
             return False  # destination is full
