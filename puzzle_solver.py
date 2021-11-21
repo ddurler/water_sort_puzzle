@@ -124,7 +124,7 @@ class PuzzleSolver:
         verbose_cycle: If not nul, periodical trace (in seconds) of the current solving situation.
             To be used in case of long computations.
         """
-        time_start = time.time()
+        time_start = time.perf_counter()
         next_time_verbose: float = verbose_cycle
 
         # List of Puzzles to do
@@ -145,7 +145,7 @@ class PuzzleSolver:
 
         while len(self.puzzle_chains_todo):
             nb_loops += 1
-            current_time = time.time() - time_start
+            current_time = time.perf_counter() - time_start
 
             # Verbosity ?
             if verbose_cycle and current_time > next_time_verbose:
@@ -237,12 +237,12 @@ def solve_generic(
 
     solver: PuzzleSolver = PuzzleSolver(puzzle)
 
-    time_start = time.time()
+    time_start = time.perf_counter()
     solution: Optional[PuzzleChain] = solver.solve(
         nb_chains_without_empty_bottle=nb_chains_without_empty_bottle,
         verbose_cycle=verbose_cycle,
     )
-    time_solving = time.time() - time_start
+    time_solving = time.perf_counter() - time_start
 
     if solution:
         print(f"Solution ({time_solving:.3f} secs):")
