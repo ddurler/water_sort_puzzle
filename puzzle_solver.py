@@ -279,15 +279,19 @@ def main():
             solve_generic(puzzle)
 
     # Puzzle colors
-    GREEN = 0
-    PINK = 1
-    YELLOW = 2
-    DARK_BLUE = 3
-    GRAY = 4
+    LIGHT_GREEN = 0
+    GREEN = 1
+    DARK_GREEN = 2
+    PINK = 3
+    YELLOW = 4
     LIGHT_BLUE = 5
-    RED = 6
-    ORANGE = 7
-    VIOLET = 8
+    BLUE = 6
+    DARK_BLUE = 7
+    GRAY = 8
+    LIGHT_BLUE = 9
+    RED = 10
+    ORANGE =11
+    VIOLET = 12
 
     def solve_puzzle29() -> None:
         """
@@ -339,10 +343,41 @@ def main():
             verbose_cycle=10,
         )
 
+    def solve_puzzle112() -> None:
+        """
+        Puzzle #112 in 'Water Sort Puzzle' (Andoid OS)
+        """
+
+        solve_generic(
+            Puzzle(
+                [
+                    Bottle([LIGHT_GREEN, DARK_BLUE, BLUE, GRAY]),
+                    Bottle([DARK_GREEN, PINK, GRAY, DARK_BLUE]),
+                    Bottle([DARK_GREEN, GREEN, LIGHT_BLUE, VIOLET]),
+                    Bottle([GREEN, PINK, BLUE, ORANGE]),
+                    Bottle([GREEN, YELLOW, DARK_BLUE, PINK]),
+                    Bottle([ORANGE, GREEN, BLUE, RED]),
+                    Bottle([VIOLET, DARK_GREEN, VIOLET, LIGHT_GREEN]),
+
+                    Bottle([RED, DARK_GREEN, LIGHT_GREEN, VIOLET]),
+                    Bottle([DARK_BLUE, LIGHT_BLUE, LIGHT_BLUE, ORANGE]),
+                    Bottle([RED, BLUE, PINK, LIGHT_GREEN]),
+                    Bottle([GRAY, ORANGE, LIGHT_BLUE, YELLOW]),
+                    Bottle([YELLOW, GRAY, RED, YELLOW]),
+
+                    Bottle([]),
+                    Bottle([]),
+                ]
+            ),
+            nb_chains_without_empty_bottle=4,
+            verbose_cycle=10,
+        )
+
     # Résolution des puzzles
     solve_puzzle0()
     solve_puzzle29()
     solve_puzzle37()
+    solve_puzzle112()
 
 
 if __name__ == "__main__":
