@@ -93,6 +93,9 @@ class MyPuzzle:
         self.div_puzzle_status_message: Optional[
             JustPy_Component
         ] = None  # Div component for puzzle status message
+        self.button_puzzle_solve: Optional[
+            JustPy_Component
+        ] = None  # Button component for solving the puzzle
 
     def iter_on_bottles(self) -> Iterator[MyBottle]:
         """Iterator on all bottles in the puzzle"""
@@ -150,14 +153,23 @@ class MyPuzzle:
             return False, "Nb doses per bottle is not defined"
 
 
+def button_puzzle_solve_click(self: JustPy_Component, msg: JustPy_Message) -> None:
+    """Click on the button for the current puzzle solving"""
+    print("SOLVE IT !")
+
+
 def do_update_puzzle_status_message(puzzle: MyPuzzle) -> None:
     """Update the puzzle status message"""
     if puzzle.div_puzzle_status_message is not None:
         ok, message = puzzle.puzzle_status()
         if ok:
-            puzzle.div_puzzle_status_message.text = "Puzzle is OK !"
+            puzzle.div_puzzle_status_message.text = ""
+            if puzzle.button_puzzle_solve is not None:
+                puzzle.button_puzzle_solve.show = True
         else:
             puzzle.div_puzzle_status_message.text = message
+            if puzzle.button_puzzle_solve is not None:
+                puzzle.button_puzzle_solve.show = False
 
 
 def do_update_bottle_dose_button(self: JustPy_Component) -> None:
@@ -293,6 +305,14 @@ async def puzzle_div_construction(puzzle: MyPuzzle) -> None:
             a=div_root,
         )
         puzzle.div_puzzle_status_message = div_puzzle_status_message
+        button_puzzle_solve = jp.Button(
+            text="Solve it !",
+            a=div_puzzle_status_message,
+            classes="w-32 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
+            click=button_puzzle_solve_click,
+        )
+        button_puzzle_solve.show = False
+        puzzle.button_puzzle_solve = button_puzzle_solve
         await puzzle.page.update()
 
 
