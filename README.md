@@ -82,7 +82,16 @@ Pour (1) into (2) :
 
 And it's done...
 
-## How to solve a puzzle
+## Solving using justpy_puzzle_solver
+
+The `justpy_puzzle_solver` module exposes an HTTP server which serves HTML page to help water sort puzzle resolution.
+
+First run the HTTP server using the `python .\justpy_puzzle_solver.py`.  
+Then, open a browser and connect to this server. On the local machine, use `localhost` or `127.0.0.1` HTTP address.
+Once the page is loaded, follow the instruction to create and solve the puzzle.
+
+
+## How to solve a puzzle in 'pure python'
 
 To solve a puzzle, proceed as follows with the content of this module;
 
