@@ -1,5 +1,5 @@
 """
-WIP : water sort solver solver
+Water sort solver solver
 """
 from __future__ import annotations
 
@@ -65,6 +65,13 @@ def get_my_color_from_id(id: int) -> MyColor:
     return MyColor(id, "black", "Black")
 
 
+class MyPuzzleSolver:
+    """Instance of MyPuzzleSolver does the puzzle solving"""
+
+    def __init__(self, my_puzzle: MyPuzzle) -> None:
+        self.my_puzzle = my_puzzle
+
+
 class MyPuzzle:
     """Instance of MyPuzzle holds the current puzzle properties"""
 
@@ -85,15 +92,15 @@ class MyPuzzle:
         self.div_color_message: Optional[
             JustPy_Component
         ] = None  # Div component for color message
-        self.div_puzzle: Optional[
+        self.div_my_puzzle: Optional[
             JustPy_Component
         ] = None  # Div component with the puzzle
         self.cur_color: Optional[MyColor] = None  # Current color selected
         self.bottles: list[MyBottle] = []  # Bottle objects in the puzzle
-        self.div_puzzle_status_message: Optional[
+        self.div_my_puzzle_status_message: Optional[
             JustPy_Component
         ] = None  # Div component for puzzle status message
-        self.button_puzzle_solve: Optional[
+        self.button_my_puzzle_solve: Optional[
             JustPy_Component
         ] = None  # Button component for solving the puzzle
 
@@ -108,7 +115,7 @@ class MyPuzzle:
             for dose in bottle.doses:
                 yield bottle, dose
 
-    def puzzle_status(self) -> tuple[bool, str]:
+    def my_puzzle_status(self) -> tuple[bool, str]:
         """
         Return (True, "") when the puzzle is correct
         Return (False, "Message") when the puzzle is not fullfiled
@@ -153,36 +160,36 @@ class MyPuzzle:
             return False, "Nb doses per bottle is not defined"
 
 
-def button_puzzle_solve_click(self: JustPy_Component, msg: JustPy_Message) -> None:
+def button_my_puzzle_solve_click(self: JustPy_Component, msg: JustPy_Message) -> None:
     """Click on the button for the current puzzle solving"""
-    print("SOLVE IT !")
+    print("SOLVE THIS PUZZLE !")
 
 
-def do_update_puzzle_status_message(puzzle: MyPuzzle) -> None:
+def do_update_my_puzzle_status_message(my_puzzle: MyPuzzle) -> None:
     """Update the puzzle status message"""
-    if puzzle.div_puzzle_status_message is not None:
-        ok, message = puzzle.puzzle_status()
+    if my_puzzle.div_my_puzzle_status_message is not None:
+        ok, message = my_puzzle.my_puzzle_status()
         if ok:
-            puzzle.div_puzzle_status_message.text = ""
-            if puzzle.button_puzzle_solve is not None:
-                puzzle.button_puzzle_solve.show = True
+            my_puzzle.div_my_puzzle_status_message.text = ""
+            if my_puzzle.button_my_puzzle_solve is not None:
+                my_puzzle.button_my_puzzle_solve.show = True
         else:
-            puzzle.div_puzzle_status_message.text = message
-            if puzzle.button_puzzle_solve is not None:
-                puzzle.button_puzzle_solve.show = False
+            my_puzzle.div_my_puzzle_status_message.text = message
+            if my_puzzle.button_my_puzzle_solve is not None:
+                my_puzzle.button_my_puzzle_solve.show = False
 
 
 def do_update_bottle_dose_button(self: JustPy_Component) -> None:
     """Update the button component of a bottle dose"""
-    if self.color is None and self.puzzle.cur_color is not None:
-        self.color = self.puzzle.cur_color
-        self.style = f"background-color: {self.puzzle.cur_color.html_color}"
+    if self.color is None and self.my_puzzle.cur_color is not None:
+        self.color = self.my_puzzle.cur_color
+        self.style = f"background-color: {self.my_puzzle.cur_color.html_color}"
     else:
         self.color = None
         self.style = "color: white"
         self.set_class("bg-black")
 
-    do_update_puzzle_status_message(self.puzzle)
+    do_update_my_puzzle_status_message(self.my_puzzle)
 
 
 def button_bottle_dose_click(self: JustPy_Component, msg: JustPy_Message):
@@ -193,7 +200,7 @@ def button_bottle_dose_click(self: JustPy_Component, msg: JustPy_Message):
 class MyBottle(jp.Div):
     """JustPy custom component for one bottle in the puzzle"""
 
-    def __init__(self, puzzle: MyPuzzle, i_bottle: int, **kwargs) -> None:
+    def __init__(self, my_puzzle: MyPuzzle, i_bottle: int, **kwargs) -> None:
         root = self
 
         super().__init__(
@@ -202,21 +209,21 @@ class MyBottle(jp.Div):
             **kwargs,
         )
         self.i_bottle: int = i_bottle
-        self.puzzle: MyPuzzle = puzzle
-        puzzle.bottles.append(self)
+        self.my_puzzle: MyPuzzle = my_puzzle
+        my_puzzle.bottles.append(self)
         self.doses: list[JustPy_Component] = []
 
         # Create dose buttons
         button_classes = "w-16 bg-black hover:bg-white text-white font-bold"
-        if puzzle.nb_doses is not None:
-            for i in range(puzzle.nb_doses):
+        if my_puzzle.nb_doses is not None:
+            for i in range(my_puzzle.nb_doses):
                 b = jp.Button(
                     text=f"{i + 1}",
                     a=root,
                     classes=button_classes,
                     click=button_bottle_dose_click,
                 )
-                b.puzzle = puzzle
+                b.my_puzzle = my_puzzle
                 self.doses.append(b)
                 b.i_dose = i
                 b.color = None
@@ -232,47 +239,50 @@ class MyBottle(jp.Div):
         return True
 
 
-def do_change_show_div_sizes(puzzle: MyPuzzle, show: bool) -> None:
+def do_change_show_div_sizes(my_puzzle: MyPuzzle, show: bool) -> None:
     """Change the visibility of the div containing the input sizes"""
-    if puzzle.div_sizes is not None:
-        puzzle.div_sizes.show = show  # type: ignore
+    if my_puzzle.div_sizes is not None:
+        my_puzzle.div_sizes.show = show  # type: ignore
 
 
-def do_change_show_div_colors(puzzle: MyPuzzle, show: bool) -> None:
+def do_change_show_div_colors(my_puzzle: MyPuzzle, show: bool) -> None:
     """Change the visibility of the div containing the color selection"""
-    if puzzle.div_colors is not None:
-        puzzle.div_colors.show = show  # type: ignore
-        puzzle.div_color_message.show = show  # type: ignore
+    if my_puzzle.div_colors is not None:
+        my_puzzle.div_colors.show = show  # type: ignore
+        my_puzzle.div_color_message.show = show  # type: ignore
 
 
-def do_change_show_div_puzzle(puzzle: MyPuzzle, show: bool) -> None:
+def do_change_show_div_my_puzzle(my_puzzle: MyPuzzle, show: bool) -> None:
     """Change the visibility of the div containing the puzzle"""
-    if puzzle.div_puzzle is not None:
-        puzzle.div_puzzle.show = show  # type: ignore
+    if my_puzzle.div_my_puzzle is not None:
+        my_puzzle.div_my_puzzle.show = show  # type: ignore
 
 
 def color_click(self: JustPy_Component, msg: JustPy_Message) -> None:
     """Click on a color button"""
-    msg.page.puzzle.cur_color = self.color
-    self.div_color_message.text = f"'{self.text}' color selected... Click on puzzle bottle doses 1 to {msg.page.puzzle.nb_doses} below..."
+    msg.page.my_puzzle.cur_color = self.color
+    self.div_color_message.text = f"'{self.text}' color selected... Click on puzzle bottle doses 1 to {msg.page.my_puzzle.nb_doses} below..."
     self.div_color_message.style = f"color: {self.color.html_color}"
 
 
-async def check_do_change_show_puzzle(msg: JustPy_Message) -> None:
+async def check_do_change_show_my_puzzle(msg: JustPy_Message) -> None:
     """Check during callback if size is defined.
     When defined, an empty puzzle is contructed and colors and puzzle is visible"""
-    if msg.page.puzzle.nb_bottles is not None and msg.page.puzzle.nb_doses is not None:
-        await puzzle_div_construction(msg.page.puzzle)
-        do_change_show_div_sizes(msg.page.puzzle, False)
-        do_change_show_div_colors(msg.page.puzzle, True)
-        do_change_show_div_puzzle(msg.page.puzzle, True)
+    if (
+        msg.page.my_puzzle.nb_bottles is not None
+        and msg.page.my_puzzle.nb_doses is not None
+    ):
+        await my_puzzle_div_construction(msg.page.my_puzzle)
+        do_change_show_div_sizes(msg.page.my_puzzle, False)
+        do_change_show_div_colors(msg.page.my_puzzle, True)
+        do_change_show_div_my_puzzle(msg.page.my_puzzle, True)
 
 
 async def nb_bottles_change(self: JustPy_Component, msg: JustPy_Message) -> None:
     """Callback on change the number of bottles"""
     if 1 <= self.value <= MAX_NB_BOTTLES:
-        msg.page.puzzle.nb_bottles = self.value
-        await check_do_change_show_puzzle(msg)
+        msg.page.my_puzzle.nb_bottles = self.value
+        await check_do_change_show_my_puzzle(msg)
     else:
         self.div_message.text = f"Number of bottles is in range 1 to {MAX_NB_BOTTLES} !"
 
@@ -280,53 +290,53 @@ async def nb_bottles_change(self: JustPy_Component, msg: JustPy_Message) -> None
 async def nb_doses_change(self: JustPy_Component, msg: JustPy_Message) -> None:
     """Callback on change the number of doses per bottle"""
     if 1 <= self.value <= MAX_NB_DOSES_PER_BOTTLE:
-        msg.page.puzzle.nb_doses = self.value
-        await check_do_change_show_puzzle(msg)
+        msg.page.my_puzzle.nb_doses = self.value
+        await check_do_change_show_my_puzzle(msg)
     else:
         self.div_message.text = (
             f"Number of doses per bottle is in range 1 to {MAX_NB_DOSES_PER_BOTTLE} !"
         )
 
 
-async def puzzle_div_construction(puzzle: MyPuzzle) -> None:
+async def my_puzzle_div_construction(my_puzzle: MyPuzzle) -> None:
     """Construct the puzzle once its size is known"""
-    div_root = puzzle.div_puzzle
+    div_root = my_puzzle.div_my_puzzle
     div_bottles = jp.Div(classes="flex m-2 flex-wrap", a=div_root)
-    if puzzle.nb_bottles is not None:
-        for i_bottle in range(puzzle.nb_bottles):
+    if my_puzzle.nb_bottles is not None:
+        for i_bottle in range(my_puzzle.nb_bottles):
             MyBottle(
-                puzzle=puzzle,
+                my_puzzle=my_puzzle,
                 i_bottle=i_bottle,
                 a=div_bottles,
             )
-        div_puzzle_status_message = jp.Div(
+        div_my_puzzle_status_message = jp.Div(
             text="... and click on bottle dose to set/unset the color",
             classes=div_message_classes,
             a=div_root,
         )
-        puzzle.div_puzzle_status_message = div_puzzle_status_message
-        button_puzzle_solve = jp.Button(
+        my_puzzle.div_my_puzzle_status_message = div_my_puzzle_status_message
+        button_my_puzzle_solve = jp.Button(
             text="Solve it !",
-            a=div_puzzle_status_message,
+            a=div_my_puzzle_status_message,
             classes="w-32 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
-            click=button_puzzle_solve_click,
+            click=button_my_puzzle_solve_click,
         )
-        button_puzzle_solve.show = False
-        puzzle.button_puzzle_solve = button_puzzle_solve
-        await puzzle.page.update()
+        button_my_puzzle_solve.show = False
+        my_puzzle.button_my_puzzle_solve = button_my_puzzle_solve
+        await my_puzzle.page.update()
 
 
-def puzzle_solver_construction() -> JustPy_Page:
+def my_puzzle_solver_construction() -> JustPy_Page:
     """Puzzle construction for justpy"""
     wp = jp.WebPage()
-    wp.puzzle = MyPuzzle(wp)
+    wp.my_puzzle = MyPuzzle(wp)
     wp.title = APP_TITLE
     wp.favicon = APP_FAVICON
 
     # input number of bottles and bottle size (visible at the begining and hidden once defined)
     div_sizes = jp.Div(a=wp)
-    wp.puzzle.div_sizes = div_sizes
-    do_change_show_div_sizes(wp.puzzle, True)
+    wp.my_puzzle.div_sizes = div_sizes
+    do_change_show_div_sizes(wp.my_puzzle, True)
 
     div_sizes_message = jp.Div(
         text="First, define the puzzle size with the total number of bottles (including empty ones) "
@@ -356,7 +366,7 @@ def puzzle_solver_construction() -> JustPy_Page:
 
     # create the color div selector
     div_colors = jp.Div(classes="flex m-4 flex-wrap", a=wp)
-    wp.puzzle.div_colors = div_colors
+    wp.my_puzzle.div_colors = div_colors
 
     button_color_classes = (
         "w-32 mr-2 mb-2 bg-black hover:bg-white font-bold py-2 px-4 rounded-full"
@@ -366,10 +376,10 @@ def puzzle_solver_construction() -> JustPy_Page:
         classes=div_message_classes,
         a=wp,
     )
-    wp.puzzle.div_color_message = div_color_message
+    wp.my_puzzle.div_color_message = div_color_message
 
     # color selector is hidden until size is defined
-    do_change_show_div_colors(wp.puzzle, False)
+    do_change_show_div_colors(wp.my_puzzle, False)
 
     # create a button for each possible colors
     for color in ALL_COLORS:
@@ -386,12 +396,12 @@ def puzzle_solver_construction() -> JustPy_Page:
     jp.Hr(a=wp)  # Add horizontal like to page
 
     # create the puzzle div (hidden until size is defined)
-    div_puzzle = jp.Div(a=wp)
-    wp.puzzle.div_puzzle = div_puzzle
-    do_change_show_div_puzzle(wp.puzzle, False)
+    div_my_puzzle = jp.Div(a=wp)
+    wp.my_puzzle.div_my_puzzle = div_my_puzzle
+    do_change_show_div_my_puzzle(wp.my_puzzle, False)
 
     return wp
 
 
 # This starts de HTML server
-jp.justpy(puzzle_solver_construction, host="0.0.0.0", port=80)
+jp.justpy(my_puzzle_solver_construction, host="0.0.0.0", port=80)
