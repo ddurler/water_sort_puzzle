@@ -9,6 +9,10 @@ from collections import defaultdict
 
 import justpy as jp  # type: ignore
 
+# Puzzle solver classes
+from puzzle import Puzzle
+from bottle import Bottle
+from puzzle_solver import PuzzleSolver, PuzzleChain
 
 APP_TITLE: str = "water sort puzzle solver"
 APP_FAVICON: str = "./jigsaw.ico"
@@ -63,13 +67,6 @@ def get_my_color_from_id(id: int) -> MyColor:
         if color.id == id:
             return color
     return MyColor(id, "black", "Black")
-
-
-class MyPuzzleSolver:
-    """Instance of MyPuzzleSolver does the puzzle solving"""
-
-    def __init__(self, my_puzzle: MyPuzzle) -> None:
-        self.my_puzzle = my_puzzle
 
 
 class MyPuzzle:
@@ -160,9 +157,44 @@ class MyPuzzle:
             return False, "Nb doses per bottle is not defined"
 
 
+class MyPuzzleSolver:
+    """Instance of MyPuzzleSolver does the puzzle solving"""
+
+    def __init__(self, my_puzzle: MyPuzzle) -> None:
+        self.my_puzzle: MyPuzzle = my_puzzle
+        self.puzzle: Puzzle = self.create_puzzle(my_puzzle)
+        self.solver: PuzzleSolver = PuzzleSolver(self.puzzle)
+        self.solution: Optional[PuzzleChain] = self.solver.solve(
+            nb_chains_without_empty_bottle=my_puzzle.nb_bottles,  # type: ignore
+            verbose_cycle=0,
+        )
+
+    def create_puzzle(self, my_puzzle: MyPuzzle) -> Puzzle:
+        """Create the puzzle object from my_puzzle construction"""
+        puzzle = Puzzle()
+        Bottle.MAX_DOSES = my_puzzle.nb_doses  # type: ignore
+        for my_bottle in my_puzzle.iter_on_bottles():
+            my_doses = []
+            for my_dose in my_bottle.doses:
+                if my_dose.color is None:
+                    break
+                else:
+                    my_doses.append(my_dose.color.id)
+            bottle = Bottle(my_doses)
+            puzzle.add_bottle(bottle)
+        return puzzle
+
+
 def button_my_puzzle_solve_click(self: JustPy_Component, msg: JustPy_Message) -> None:
     """Click on the button for the current puzzle solving"""
-    print("SOLVE THIS PUZZLE !")
+    my_puzzle: MyPuzzle = msg.page.my_puzzle
+    my_puzzle.button_my_puzzle_solve.show = False  # type: ignore
+    do_change_show_div_colors(my_puzzle, False)
+    my_puzzle_solver = MyPuzzleSolver(my_puzzle)
+    if my_puzzle_solver.solution is None:
+        my_puzzle.div_my_puzzle_status_message.text = "NO SOLUTION FOUND !"  # type: ignore
+    else:
+        my_puzzle.div_my_puzzle_status_message.text = my_puzzle_solver.solution.show_puzzle_chains()  # type: ignore
 
 
 def do_update_my_puzzle_status_message(my_puzzle: MyPuzzle) -> None:
