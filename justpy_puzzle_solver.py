@@ -185,14 +185,18 @@ class MyPuzzleSolver:
 
     def __init__(self, my_puzzle: MyPuzzle) -> None:
         self.my_puzzle: MyPuzzle = my_puzzle
-        puzzle: Puzzle = self.create_puzzle(my_puzzle)
+        puzzle: Puzzle = self._create_puzzle(my_puzzle)
         solver: PuzzleSolver = PuzzleSolver(puzzle)
-        self.solution: Optional[PuzzleChain] = solver.solve(
+        solution: Optional[PuzzleChain] = solver.solve(
             nb_chains_without_empty_bottle=my_puzzle.nb_bottles,  # type: ignore
             verbose_cycle=0,
         )
+        self.solution_steps: Optional[list[PuzzleChain]] = None
+        if solution is not None:
+            self.solution_steps = solution.get_puzzle_chain_as_list()
+        self.i_current_step = 0
 
-    def create_puzzle(self, my_puzzle: MyPuzzle) -> Puzzle:
+    def _create_puzzle(self, my_puzzle: MyPuzzle) -> Puzzle:
         """Create the puzzle object from my_puzzle construction"""
         puzzle = Puzzle()
         # TODO : Next line breaks the multi-session capability (need to refactor the Bottle module)
@@ -209,16 +213,49 @@ class MyPuzzleSolver:
         return puzzle
 
 
+def do_show_solution_step(my_puzzle: MyPuzzle) -> None:
+    """Show the current solution step"""
+    i_current_step: int = my_puzzle.my_puzzle_solver.i_current_step  # type: ignore
+    nb_steps: int = len(my_puzzle.my_puzzle_solver.solution_steps)  # type: ignore
+    if i_current_step < 0:
+        i_current_step = 0
+    elif i_current_step >= nb_steps:
+        i_current_step = nb_steps - 1
+    step: PuzzleChain = my_puzzle.my_puzzle_solver.solution_steps[i_current_step]  # type: ignore
+
+    if i_current_step == 0:
+        # Show initial puzzle
+        my_puzzle.button_explore_solution_previous.show = False  # type: ignore
+        my_puzzle.div_explore_solution_message.text = f"The solution is {nb_steps - 1} steps long"  # type: ignore
+        my_puzzle.button_explore_solution_next.show = True  # type: ignore
+    elif i_current_step == nb_steps - 1:
+        # Show final step
+        my_puzzle.button_explore_solution_previous.show = True  # type: ignore
+        my_puzzle.div_explore_solution_message.text = f"{step.message} and it's done !"  # type: ignore
+        my_puzzle.button_explore_solution_next.show = False  # type: ignore
+    else:
+        # Show intermediate step
+        my_puzzle.button_explore_solution_previous.show = True  # type: ignore
+        my_puzzle.div_explore_solution_message.text = step.message  # type: ignore
+        my_puzzle.button_explore_solution_next.show = True  # type: ignore
+
+
 def button_explore_solution_previous_click(
     self: JustPy_Component, msg: JustPy_Message
 ) -> None:
-    print("PREVIOUS !")
+    my_puzzle: MyPuzzle = msg.page.my_puzzle
+    if my_puzzle.my_puzzle_solver is not None:
+        my_puzzle.my_puzzle_solver.i_current_step -= 1
+        do_show_solution_step(my_puzzle)
 
 
 def button_explore_solution_next_click(
     self: JustPy_Component, msg: JustPy_Message
 ) -> None:
-    print("NEXT !")
+    my_puzzle: MyPuzzle = msg.page.my_puzzle
+    if my_puzzle.my_puzzle_solver is not None:
+        my_puzzle.my_puzzle_solver.i_current_step += 1
+        do_show_solution_step(my_puzzle)
 
 
 def button_my_puzzle_solve_click(self: JustPy_Component, msg: JustPy_Message) -> None:
@@ -228,14 +265,13 @@ def button_my_puzzle_solve_click(self: JustPy_Component, msg: JustPy_Message) ->
         my_puzzle.button_my_puzzle_solve.show = False  # type: ignore
         do_change_show_div_colors(my_puzzle, False)
         my_puzzle.my_puzzle_solver = MyPuzzleSolver(my_puzzle)
-        if my_puzzle.my_puzzle_solver.solution is None:
+        if my_puzzle.my_puzzle_solver.solution_steps is None:
             my_puzzle.div_my_puzzle_status_message.text = "NO SOLUTION FOUND !"  # type: ignore
         else:
             # Init explore solution
             my_puzzle.div_my_puzzle_status_message.show = False  # type: ignore
             my_puzzle.div_explore_solution.show = True  # type: ignore
-            my_puzzle.button_explore_solution_previous.show = False  # type: ignore
-            my_puzzle.div_explore_solution_message.text = my_puzzle.my_puzzle_solver.solution.show_puzzle_chains()  # type: ignore
+            do_show_solution_step(my_puzzle)
 
 
 def do_update_my_puzzle_status_message(my_puzzle: MyPuzzle) -> None:
@@ -402,12 +438,12 @@ async def my_puzzle_div_construction(my_puzzle: MyPuzzle) -> None:
         my_puzzle.button_my_puzzle_solve = button_my_puzzle_solve
 
         # Explore solution section
-        div_explore_solution = jp.Div(classes=div_message_classes, a=div_root)
+        div_explore_solution = jp.Div(classes="flex", a=div_root)
         my_puzzle.div_explore_solution = div_explore_solution
         button_explore_solution_previous = jp.Button(
             text="Previous step",
             a=div_explore_solution,
-            classes="w-32 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
+            classes="w-64 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
             click=button_explore_solution_previous_click,
         )
         my_puzzle.button_explore_solution_previous = button_explore_solution_previous
@@ -420,7 +456,7 @@ async def my_puzzle_div_construction(my_puzzle: MyPuzzle) -> None:
         button_explore_solution_next = jp.Button(
             text="Next step",
             a=div_explore_solution,
-            classes="w-32 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
+            classes="w-64 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
             click=button_explore_solution_next_click,
         )
         my_puzzle.button_explore_solution_next = button_explore_solution_next
