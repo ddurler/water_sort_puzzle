@@ -74,6 +74,8 @@ class MyPuzzle:
 
     def __init__(self, page: JustPy_Page) -> None:
         self.page = page
+
+        # Puzzle sizes
         self.nb_bottles: Optional[
             int
         ] = None  # Number of bottles in the puzzle (including empty ones)
@@ -83,23 +85,44 @@ class MyPuzzle:
         self.div_sizes: Optional[
             JustPy_Component
         ] = None  # Div component with size inputs
+
+        # Colors section
         self.div_colors: Optional[
             JustPy_Component
         ] = None  # Div component with color buttons
         self.div_color_message: Optional[
             JustPy_Component
         ] = None  # Div component for color message
+        self.cur_color: Optional[MyColor] = None  # Current color selected
+
+        # Puzzle section
         self.div_my_puzzle: Optional[
             JustPy_Component
         ] = None  # Div component with the puzzle
-        self.cur_color: Optional[MyColor] = None  # Current color selected
         self.bottles: list[MyBottle] = []  # Bottle objects in the puzzle
         self.div_my_puzzle_status_message: Optional[
             JustPy_Component
         ] = None  # Div component for puzzle status message
+
+        # Puzzle solve section
         self.button_my_puzzle_solve: Optional[
             JustPy_Component
         ] = None  # Button component for solving the puzzle
+
+        # Explore solution section
+        self.my_puzzle_solver: Optional[MyPuzzleSolver] = None  # Puzzle solver
+        self.div_explore_solution: Optional[
+            JustPy_Component
+        ] = None  # Div component to explore solution steps
+        self.button_explore_solution_previous: Optional[
+            JustPy_Component
+        ] = None  # Button to previous step
+        self.div_explore_solution_message: Optional[
+            JustPy_Component
+        ] = None  # Div component for current step
+        self.button_explore_solution_next: Optional[
+            JustPy_Component
+        ] = None  # Button to next step
 
     def iter_on_bottles(self) -> Iterator[MyBottle]:
         """Iterator on all bottles in the puzzle"""
@@ -162,9 +185,9 @@ class MyPuzzleSolver:
 
     def __init__(self, my_puzzle: MyPuzzle) -> None:
         self.my_puzzle: MyPuzzle = my_puzzle
-        self.puzzle: Puzzle = self.create_puzzle(my_puzzle)
-        self.solver: PuzzleSolver = PuzzleSolver(self.puzzle)
-        self.solution: Optional[PuzzleChain] = self.solver.solve(
+        puzzle: Puzzle = self.create_puzzle(my_puzzle)
+        solver: PuzzleSolver = PuzzleSolver(puzzle)
+        self.solution: Optional[PuzzleChain] = solver.solve(
             nb_chains_without_empty_bottle=my_puzzle.nb_bottles,  # type: ignore
             verbose_cycle=0,
         )
@@ -172,6 +195,7 @@ class MyPuzzleSolver:
     def create_puzzle(self, my_puzzle: MyPuzzle) -> Puzzle:
         """Create the puzzle object from my_puzzle construction"""
         puzzle = Puzzle()
+        # TODO : Next line breaks the multi-session capability (need to refactor the Bottle module)
         Bottle.MAX_DOSES = my_puzzle.nb_doses  # type: ignore
         for my_bottle in my_puzzle.iter_on_bottles():
             my_doses = []
@@ -185,16 +209,33 @@ class MyPuzzleSolver:
         return puzzle
 
 
+def button_explore_solution_previous_click(
+    self: JustPy_Component, msg: JustPy_Message
+) -> None:
+    print("PREVIOUS !")
+
+
+def button_explore_solution_next_click(
+    self: JustPy_Component, msg: JustPy_Message
+) -> None:
+    print("NEXT !")
+
+
 def button_my_puzzle_solve_click(self: JustPy_Component, msg: JustPy_Message) -> None:
     """Click on the button for the current puzzle solving"""
     my_puzzle: MyPuzzle = msg.page.my_puzzle
-    my_puzzle.button_my_puzzle_solve.show = False  # type: ignore
-    do_change_show_div_colors(my_puzzle, False)
-    my_puzzle_solver = MyPuzzleSolver(my_puzzle)
-    if my_puzzle_solver.solution is None:
-        my_puzzle.div_my_puzzle_status_message.text = "NO SOLUTION FOUND !"  # type: ignore
-    else:
-        my_puzzle.div_my_puzzle_status_message.text = my_puzzle_solver.solution.show_puzzle_chains()  # type: ignore
+    if my_puzzle.my_puzzle_solver is None:  # Avoid multiple reentrance
+        my_puzzle.button_my_puzzle_solve.show = False  # type: ignore
+        do_change_show_div_colors(my_puzzle, False)
+        my_puzzle.my_puzzle_solver = MyPuzzleSolver(my_puzzle)
+        if my_puzzle.my_puzzle_solver.solution is None:
+            my_puzzle.div_my_puzzle_status_message.text = "NO SOLUTION FOUND !"  # type: ignore
+        else:
+            # Init explore solution
+            my_puzzle.div_my_puzzle_status_message.show = False  # type: ignore
+            my_puzzle.div_explore_solution.show = True  # type: ignore
+            my_puzzle.button_explore_solution_previous.show = False  # type: ignore
+            my_puzzle.div_explore_solution_message.text = my_puzzle.my_puzzle_solver.solution.show_puzzle_chains()  # type: ignore
 
 
 def do_update_my_puzzle_status_message(my_puzzle: MyPuzzle) -> None:
@@ -333,6 +374,8 @@ async def nb_doses_change(self: JustPy_Component, msg: JustPy_Message) -> None:
 async def my_puzzle_div_construction(my_puzzle: MyPuzzle) -> None:
     """Construct the puzzle once its size is known"""
     div_root = my_puzzle.div_my_puzzle
+
+    # Puzzle section
     div_bottles = jp.Div(classes="flex m-2 flex-wrap", a=div_root)
     if my_puzzle.nb_bottles is not None:
         for i_bottle in range(my_puzzle.nb_bottles):
@@ -347,6 +390,8 @@ async def my_puzzle_div_construction(my_puzzle: MyPuzzle) -> None:
             a=div_root,
         )
         my_puzzle.div_my_puzzle_status_message = div_my_puzzle_status_message
+
+        # Puzzle solve section
         button_my_puzzle_solve = jp.Button(
             text="Solve it !",
             a=div_my_puzzle_status_message,
@@ -355,6 +400,33 @@ async def my_puzzle_div_construction(my_puzzle: MyPuzzle) -> None:
         )
         button_my_puzzle_solve.show = False
         my_puzzle.button_my_puzzle_solve = button_my_puzzle_solve
+
+        # Explore solution section
+        div_explore_solution = jp.Div(classes=div_message_classes, a=div_root)
+        my_puzzle.div_explore_solution = div_explore_solution
+        button_explore_solution_previous = jp.Button(
+            text="Previous step",
+            a=div_explore_solution,
+            classes="w-32 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
+            click=button_explore_solution_previous_click,
+        )
+        my_puzzle.button_explore_solution_previous = button_explore_solution_previous
+        div_explore_solution_message = jp.Div(
+            text="Current step",
+            classes=div_message_classes,
+            a=div_explore_solution,
+        )
+        my_puzzle.div_explore_solution_message = div_explore_solution_message
+        button_explore_solution_next = jp.Button(
+            text="Next step",
+            a=div_explore_solution,
+            classes="w-32 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
+            click=button_explore_solution_next_click,
+        )
+        my_puzzle.button_explore_solution_next = button_explore_solution_next
+
+        div_explore_solution.show = False
+
         await my_puzzle.page.update()
 
 
