@@ -50,7 +50,7 @@ class PuzzleChain:
         # Create list of puzzles in the chain
         puzzle_chain_queue: collections.deque[PuzzleChain] = collections.deque()
         puzzle_chain_queue.append(self)
-        previous = self.previous_puzzle_chain
+        previous: Optional[PuzzleChain] = self.previous_puzzle_chain
         while previous is not None:
             puzzle_chain_queue.append(previous)
             previous = previous.previous_puzzle_chain
@@ -63,6 +63,17 @@ class PuzzleChain:
             ret += f"Step#{step}: {puzzle_chain.message}:\n  {puzzle_chain.puzzle}\n"
             step += 1
         return ret
+
+    def get_puzzle_chain_as_list(self) -> list[PuzzleChain]:
+        """Return a list of PuzzleChain for the solving steps"""
+        puzzle_chain_list: list[PuzzleChain] = [self]
+        previous: Optional[PuzzleChain] = self.previous_puzzle_chain
+        while previous is not None:
+            puzzle_chain_list.append(previous)
+            previous = previous.previous_puzzle_chain
+
+        puzzle_chain_list.reverse()
+        return puzzle_chain_list
 
 
 class PuzzleSolver:
@@ -290,7 +301,7 @@ def main():
     GRAY = 8
     LIGHT_BLUE = 9
     RED = 10
-    ORANGE =11
+    ORANGE = 11
     VIOLET = 12
 
     def solve_puzzle29() -> None:
@@ -358,13 +369,11 @@ def main():
                     Bottle([GREEN, YELLOW, DARK_BLUE, PINK]),
                     Bottle([ORANGE, GREEN, BLUE, RED]),
                     Bottle([VIOLET, DARK_GREEN, VIOLET, LIGHT_GREEN]),
-
                     Bottle([RED, DARK_GREEN, LIGHT_GREEN, VIOLET]),
                     Bottle([DARK_BLUE, LIGHT_BLUE, LIGHT_BLUE, ORANGE]),
                     Bottle([RED, BLUE, PINK, LIGHT_GREEN]),
                     Bottle([GRAY, ORANGE, LIGHT_BLUE, YELLOW]),
                     Bottle([YELLOW, GRAY, RED, YELLOW]),
-
                     Bottle([]),
                     Bottle([]),
                 ]
