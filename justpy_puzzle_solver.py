@@ -188,7 +188,7 @@ class MyPuzzleSolver:
         puzzle: Puzzle = self._create_puzzle(my_puzzle)
         solver: PuzzleSolver = PuzzleSolver(puzzle)
         solution: Optional[PuzzleChain] = solver.solve(
-            nb_chains_without_empty_bottle=my_puzzle.nb_bottles,  # type: ignore
+            nb_chains_without_empty_bottle=4,  # More human looklike solution...
             verbose_cycle=0,
         )
         self.solution_steps: Optional[list[PuzzleChain]] = None
@@ -211,6 +211,17 @@ class MyPuzzleSolver:
             bottle = Bottle(my_doses)
             puzzle.add_bottle(bottle)
         return puzzle
+
+
+def do_show_puzzle(my_puzzle: MyPuzzle, puzzle: Puzzle) -> None:
+    """Show the puzzle"""
+    for my_bottle, bottle in zip(my_puzzle.iter_on_bottles(), puzzle.iter_bottles()):
+        for my_dose, id_color in zip(my_bottle.doses, bottle.doses):
+            if id_color is None:
+                do_update_bottle_dose_button_color(my_dose, None)
+            else:
+                my_color = get_my_color_from_id(id_color)
+                do_update_bottle_dose_button_color(my_dose, my_color)
 
 
 def do_show_solution_step(my_puzzle: MyPuzzle) -> None:
@@ -236,8 +247,10 @@ def do_show_solution_step(my_puzzle: MyPuzzle) -> None:
     else:
         # Show intermediate step
         my_puzzle.button_explore_solution_previous.show = True  # type: ignore
-        my_puzzle.div_explore_solution_message.text = step.message  # type: ignore
+        my_puzzle.div_explore_solution_message.text = f"Step {i_current_step}/{nb_steps - 1} : {step.message}"  # type: ignore
         my_puzzle.button_explore_solution_next.show = True  # type: ignore
+
+    do_show_puzzle(my_puzzle, step.puzzle)
 
 
 def button_explore_solution_previous_click(
@@ -288,22 +301,25 @@ def do_update_my_puzzle_status_message(my_puzzle: MyPuzzle) -> None:
                 my_puzzle.button_my_puzzle_solve.show = False
 
 
-def do_update_bottle_dose_button(self: JustPy_Component) -> None:
-    """Update the button component of a bottle dose"""
-    if self.color is None and self.my_puzzle.cur_color is not None:
-        self.color = self.my_puzzle.cur_color
-        self.style = f"background-color: {self.my_puzzle.cur_color.html_color}"
+def do_update_bottle_dose_button_color(
+    self: JustPy_Component, color: Optional[MyColor]
+) -> None:
+    self.color = color
+    if color is not None:
+        self.style = f"background-color: {color.html_color}"
     else:
-        self.color = None
         self.style = "color: white"
         self.set_class("bg-black")
-
-    do_update_my_puzzle_status_message(self.my_puzzle)
 
 
 def button_bottle_dose_click(self: JustPy_Component, msg: JustPy_Message):
     """Callback on a dose button in the puzzle"""
-    do_update_bottle_dose_button(self)
+    if self.color is None and self.my_puzzle.cur_color is not None:
+        do_update_bottle_dose_button_color(self, self.my_puzzle.cur_color)
+    else:
+        do_update_bottle_dose_button_color(self, None)
+
+    do_update_my_puzzle_status_message(self.my_puzzle)
 
 
 class MyBottle(jp.Div):
@@ -438,12 +454,13 @@ async def my_puzzle_div_construction(my_puzzle: MyPuzzle) -> None:
         my_puzzle.button_my_puzzle_solve = button_my_puzzle_solve
 
         # Explore solution section
-        div_explore_solution = jp.Div(classes="flex", a=div_root)
+        div_explore_solution = jp.Div(classes="inline-flex items-baseline", a=div_root)
         my_puzzle.div_explore_solution = div_explore_solution
+        button_explore_classes = "w-64 h-12 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full"
         button_explore_solution_previous = jp.Button(
             text="Previous step",
             a=div_explore_solution,
-            classes="w-64 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
+            classes=button_explore_classes,
             click=button_explore_solution_previous_click,
         )
         my_puzzle.button_explore_solution_previous = button_explore_solution_previous
@@ -456,7 +473,7 @@ async def my_puzzle_div_construction(my_puzzle: MyPuzzle) -> None:
         button_explore_solution_next = jp.Button(
             text="Next step",
             a=div_explore_solution,
-            classes="w-64 mr-2 mb-2 bg-green-400 hover:bg-green-600 font-bold py-2 px-4 rounded-full",
+            classes=button_explore_classes,
             click=button_explore_solution_next_click,
         )
         my_puzzle.button_explore_solution_next = button_explore_solution_next
