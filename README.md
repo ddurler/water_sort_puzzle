@@ -168,15 +168,15 @@ Step#4: Pour #1 into #3:
   if solution:
       print(solution.show_puzzle_chains())
   else:
-      print(f"Non résolu : {puzzle}\n") 
+      print(f"No solution found : {puzzle}\n") 
 ```
 
 **solve** method parameters:
 
-* **nb_chains_without_empty_bottle** : If not nul, defines the max consecutive possible moves without seing an
+* **nb_chains_without_empty_bottle** : If not `None`, defines the max consecutive possible moves without seing an
   empty bottle in the puzzle. To be used for more human likely solution finding.
 
-* **verbose_cycle** : If not nul, periodical trace (in seconds) of the current solving situation.
+* **verbose_cycle** : If not `None`, periodical trace (in seconds) of the current solving situation.
   To be used in case of long computations.
 
 
@@ -237,4 +237,3 @@ For instance, `bottle: Bottle = Bottle("AABC")` defines the following bottle:
     | A |
     | A |
     -----
-
