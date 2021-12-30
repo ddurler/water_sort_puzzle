@@ -8,7 +8,7 @@ a water sort puzzle.
 # Import to do typing :Bottle inside class Bottle
 from __future__ import annotations
 
-from typing import Sequence, Optional, List, Set, Any
+from typing import Sequence, Optional, Set, Any
 
 
 class BottleError(Exception):
@@ -19,7 +19,7 @@ class Bottle:
     """
     A bottle contains doses of colored water (up to Bottle.MAX_DOSES)
 
-    The content of a bottle is a List of objects where each objet identifies a color.
+    The content of a bottle is a list of objects where each objet identifies a color.
 
     doses = [None, None, None, None] in case of empty bottle (nb_doses = 0)
     doses = ['X', None, None, None] where the bottle contains only one dose of 'X' (nb_doses = 1)
@@ -34,7 +34,7 @@ class Bottle:
     MAX_DOSES = 4
 
     def __init__(self, doses: Sequence):
-        self.doses: List[Any] = [
+        self.doses: list[Any] = [
             None,
         ] * Bottle.MAX_DOSES
         self.nb_doses = 0

@@ -10,7 +10,7 @@ It relies on the bottle module for the content of each bottle in the puzzle.
 # Import to do typing :Puzzle inside class Puzzle
 from __future__ import annotations
 
-from typing import Any, List, Sequence, Tuple, Generator, Optional
+from typing import Any, Sequence, Tuple, Generator, Optional
 from collections import Counter
 from itertools import permutations
 
@@ -32,7 +32,7 @@ class Puzzle:
     __slots__ = ("_bottles",)
 
     def __init__(self, bottles: Optional[Sequence[Bottle]] = None) -> None:
-        self._bottles: List[Bottle] = []
+        self._bottles: list[Bottle] = []
         if bottles:
             for bottle in bottles:
                 self.add_bottle(bottle)
@@ -57,7 +57,7 @@ class Puzzle:
         """
         if len(self) != len(other):
             return False
-        table: List[bool] = [
+        table: list[bool] = [
             False for _ in range(len(self))
         ]  # Identified bottles in other puzzle
         for self_bottle in self.iter_bottles():
@@ -125,7 +125,7 @@ class Puzzle:
 
     def clone(self) -> Puzzle:
         """@return Create a copy clone of the puzzle."""
-        copy_list_bottles: List[Bottle] = []
+        copy_list_bottles: list[Bottle] = []
         for bottle in self.iter_bottles():
             copy_list_bottles.append(bottle.clone())
 
