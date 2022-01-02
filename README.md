@@ -84,6 +84,8 @@ And it's done...
 
 ## Solving using justpy_puzzle_solver
 
+A ready-to-use implementation using the great [JustPy](https://justpy.io/) high-level Python Web Framework.
+
 The `justpy_puzzle_solver` module exposes an HTTP server which serves HTML page to help water sort puzzle resolution.
 
 First run the HTTP server using the `python .\justpy_puzzle_solver.py`.  
@@ -93,13 +95,13 @@ Once the page is loaded, follow the instruction to create and solve the puzzle.
 
 ## How to solve a puzzle in 'pure python'
 
-To solve a puzzle, proceed as follows with the content of this module;
+To solve a puzzle, use the scripts `bottle`, `puzzle` and `puzzle_solver` from the content of this module;
 
 First, create a new python file in the directory: `my_puzzle.py` for instance.
 
 Edit this file and first, import the required modules:
 
-```
+```python
 from bottle import Bottle
 from puzzle import Puzzle
 from puzzle_solver import solve_generic
@@ -114,7 +116,7 @@ As python strings are simple chars sequences, an easy way is to choose a differe
 
 The puzzle shown in the introduction chapter would then simply be:
 
-```
+```python
 puzzle: Puzzle = Puzzle(
     [Bottle("BBRR"), Bottle("RR"), Bottle("BBVV"), Bottle("VV")]
 )
@@ -124,7 +126,7 @@ To computing the solution: `solve_generic(puzzle)`
 
 Thus, the entire `my_puzzle.py` file content is:
 
-```
+```python
 from bottle import Bottle
 from puzzle import Puzzle
 from puzzle_solver import solve_generic
@@ -158,7 +160,7 @@ Step#4: Pour #1 into #3:
 
 `puzzle_solver` class is for solving `puzzle`:
 
-```
+```python
   solver: PuzzleSolver = PuzzleSolver(puzzle)
 
   solution: Optional[PuzzleChain] = solver.solve(
@@ -184,7 +186,7 @@ Step#4: Pour #1 into #3:
 
 A `puzzle` is a list of `bottle's.
 
-```
+```python
     GREEN = 0
     PINK = 1
     YELLOW = 2

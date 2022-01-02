@@ -195,11 +195,11 @@ class MyPuzzleSolver:
     def _create_puzzle(self, my_puzzle: MyPuzzle) -> Puzzle:
         """Create the puzzle object from my_puzzle construction"""
         puzzle = Puzzle()
-        # TODO : Next line breaks the multi-session capability (need to refactor the Bottle module)
         if my_puzzle.nb_doses is not None:
+            # TODO : Next line breaks the multi-session capability (need to refactor the Bottle module)
             Bottle.MAX_DOSES = my_puzzle.nb_doses
         for my_bottle in my_puzzle.iter_on_bottles():
-            my_doses = []
+            my_doses: list[Any] = []
             for my_dose in my_bottle.doses:
                 if my_dose.color is None:
                     break
